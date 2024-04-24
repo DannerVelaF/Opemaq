@@ -1,18 +1,112 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import BarraSuperior from "../components/BarraSuperior";
-import Input from "../components/Input";
-import InputCorto from "../components/InputCorto";
-function Registrar() {
-  const [formData, setFormData] = useState({});
-  const handleInputChange = (name, value) => {
-    setFormData((prevData) => ({
-      ...prevData,
-      [name]: value,
-    }));
+
+const useField = ({ placeholder, name, autoComplete = "off", required }) => {
+  const [value, setValue] = useState("");
+  const onChange = (event) => {
+    setValue(event.target.value);
   };
+  const resetvalue = () => {
+    setValue("");
+  };
+  return {
+    placeholder,
+    name,
+    value,
+    onChange,
+    autoComplete,
+    required,
+    resetvalue,
+  };
+};
+
+function Registrar() {
+  const [formData, setFormData] = useState({}); // Estado para almacenar los datos del formulario
+  const [input, setInput] = useState("");
+
+  useEffect(() => {
+    setInput("prueba");
+  }, []);
+
   const handleSubmit = (e) => {
     e.preventDefault();
-    console.log(formData);
+  };
+
+  const handleInputChange = (field, value) => {
+    setFormData((prevData) => ({
+      ...prevData,
+      [field]: value,
+    }));
+  };
+
+  const inputStlye = "h-14 w-[390px] border-2 border-black ps-[17px] mt-2";
+  const shortInput = "h-[61px] w-[192px] border-2 border-black ps-[17px] mt-2";
+
+  const ruc = useField({
+    placeholder: "Ingrese el RUC de la empresa",
+    name: "ruc",
+    required: true,
+  });
+
+  const empresa = useField({
+    placeholder: "Ingrese el nombre de la empresa",
+    name: "nombre_empresa",
+    required: true,
+  });
+  const fecha_inicio = useField({
+    name: "fecha_inicio",
+    required: true,
+  });
+  const fecha_fin = useField({
+    name: "fecha_fin",
+    required: true,
+  });
+
+  const correo_empresa = useField({
+    placeholder: "Ingresa el correo de la empresa",
+    name: "correo_empresa",
+    required: true,
+  });
+
+  const telefono_empresa = useField({
+    placeholder: "Ingresa el teléfono de la empresa",
+    name: "telefono_empresa",
+    required: true,
+  });
+
+  const direccion_empresa = useField({
+    placeholder: "Ingresa la dirección de la empresa",
+    name: "dirección_empresa",
+    required: true,
+  });
+
+  const horas_uso = useField({
+    required: true,
+    name: "horas_uso",
+  });
+
+  const precio_hora = useField({
+    required: true,
+    name: "precio_hora",
+    placeholder: "s/",
+  });
+
+  const descripcion = useField({
+    placeholder: "Descripcion del contrato",
+    name: "descripcion",
+  });
+
+  const handlerReset = () => {
+    ruc.resetvalue();
+    empresa.resetvalue();
+    fecha_inicio.resetvalue();
+    fecha_fin.resetvalue();
+    correo_empresa.resetvalue();
+    telefono_empresa.resetvalue();
+    direccion_empresa.resetvalue();
+    horas_uso.resetvalue();
+    precio_hora.resetvalue();
+    descripcion.resetvalue();
   };
 
   return (
@@ -25,129 +119,231 @@ function Registrar() {
         {/* Form */}
         <form
           action=""
-          className="p-20 flex flex-col gap-14"
+          className="p-20 flex flex-col gap-2"
           onSubmit={handleSubmit}
         >
-          <div className="flex gap-28">
-            <div className="flex flex-col gap-6">
-              <div className="flex gap-28">
-                <div className="flex flex-col gap-6 ">
-                  <Input
-                    label={"RUC de la empresa"}
-                    placeholder={"Ingrese el RUC de la empresa"}
-                    onchange={handleInputChange}
-                    name={"empresa"}
+          <div className="flex gap-28 justify-center items-center">
+            {/* Column 1 */}
+            <div className="flex flex-col gap-6 ">
+              <div className="flex flex-col ">
+                <label>
+                  Ruc de la empresa{" "}
+                  {ruc.required ? (
+                    <span className="text-red-700 font-bold text-xl">*</span>
+                  ) : (
+                    ""
+                  )}
+                </label>
+                <input
+                  {...ruc}
+                  className={inputStlye}
+                  onChange={(e) => {
+                    ruc.onChange(e);
+                    handleInputChange(ruc.name, e.target.value);
+                  }}
+                />
+              </div>
+              <div className="flex flex-col ">
+                <label>
+                  Nombre de la empresa
+                  {empresa.required ? (
+                    <span className="text-red-700 font-bold text-xl">*</span>
+                  ) : (
+                    ""
+                  )}
+                </label>
+                <input
+                  {...empresa}
+                  className={inputStlye}
+                  onChange={(e) => {
+                    empresa.onChange(e);
+                    handleInputChange(empresa.name, e.target.value);
+                  }}
+                />
+              </div>
+              <div className="flex gap-2">
+                <div className="flex flex-col">
+                  <label htmlFor="">Hora de inicio</label>
+                  <input
+                    type="date"
+                    className={shortInput}
+                    {...fecha_inicio}
+                    onChange={(e) => {
+                      fecha_inicio.onChange(e);
+                      handleInputChange(fecha_inicio.name, e.target.value);
+                    }}
                   />
-                  <Input
-                    label={"Nombre de la empresa"}
-                    placeholder={"Ingrese el nombre de la empresa"}
-                    onchange={handleInputChange}
-                    name={"nombre_empresa"}
-                  />
-                  <div className="flex w-[390px] justify-around">
-                    <InputCorto
-                      label={"Fecha de inicio"}
-                      type={"date"}
-                      onchange={handleInputChange}
-                      name={"fecha_inicio"}
-                    />
-                    <InputCorto
-                      label={"Fecha de Fin"}
-                      type={"date"}
-                      required={true}
-                      onchange={handleInputChange}
-                      name={"fecha_fin"}
-                    />
-                  </div>
                 </div>
-                <div className="flex flex-col gap-6">
-                  <Input
-                    label={"Correo electrónico de la empresa"}
-                    placeholder={"Ingrese el correo de la empresa"}
-                    required={false}
-                    type="email"
-                    onchange={handleInputChange}
-                    name={"email"}
-                  />
-                  <Input
-                    label={"Teléfono de la empresa"}
-                    placeholder={"Ingrese el teléfono de la empresa"}
-                    onchange={handleInputChange}
-                    name={"telefono"}
-                  />
-                  <Input
-                    label={"Dirección de la empresa"}
-                    placeholder={"Ingrese direccion de la empresa"}
-                    onchange={handleInputChange}
-                    name={"direccion"}
+                <div className="flex flex-col">
+                  <label htmlFor="">Hora de fin</label>
+                  <input
+                    type="date"
+                    className={shortInput}
+                    {...fecha_fin}
+                    onChange={(e) => {
+                      fecha_fin.onChange(e);
+                      handleInputChange(fecha_fin.name, e.target.value);
+                    }}
                   />
                 </div>
               </div>
-              <div className="flex flex-col">
-                <label>Decripción de contrato</label>
-                <textarea
-                  type="text"
-                  className=" bottom-0 h-40 border-2  border-black p-[17px] text-start "
-                  placeholder="Descripcion"
-                  name="descripcion"
-                  onChange={(e) =>
-                    handleInputChange("descripcion", e.target.value)
-                  }
+            </div>
+            {/* Column 1 */}
+
+            {/* Column 2 */}
+            <div className="flex flex-col gap-6">
+              <div className="flex flex-col ">
+                <label>
+                  Correo electronico de la empresa
+                  {correo_empresa.required ? (
+                    <span className="text-red-700 font-bold text-xl">*</span>
+                  ) : (
+                    ""
+                  )}
+                </label>
+                <input
+                  {...correo_empresa}
+                  className={inputStlye}
+                  onChange={(e) => {
+                    correo_empresa.onChange(e);
+                    handleInputChange(correo_empresa.name, e.target.value);
+                  }}
+                />
+              </div>
+              <div className="flex flex-col ">
+                <label>
+                  Teléfono de la empresa
+                  {telefono_empresa.required ? (
+                    <span className="text-red-700 font-bold text-xl">*</span>
+                  ) : (
+                    ""
+                  )}
+                </label>
+                <input
+                  {...telefono_empresa}
+                  className={inputStlye}
+                  onChange={(e) => {
+                    telefono_empresa.onChange(e);
+                    handleInputChange(telefono_empresa.name, e.target.value);
+                  }}
+                />
+              </div>
+              <div className="flex flex-col ">
+                <label>
+                  Dirección de la empresa
+                  {direccion_empresa.required ? (
+                    <span className="text-red-700 font-bold text-xl">*</span>
+                  ) : (
+                    ""
+                  )}
+                </label>
+                <input
+                  {...direccion_empresa}
+                  className={inputStlye}
+                  onChange={(e) => {
+                    direccion_empresa.onChange(e);
+                    handleInputChange(direccion_empresa.name, e.target.value);
+                  }}
                 />
               </div>
             </div>
+            {/* Column 2 */}
+
+            {/* Column 3 */}
             <div className="flex flex-col gap-6">
-              <Input
-                label={"Tipo de máquina"}
-                required={true}
-                type="email"
-                onchange={handleInputChange}
-                name={"email"}
-              />
-              <Input
-                label={"Marca de la máquina"}
-                onchange={handleInputChange}
-                name={"marca"}
-              />
-              <Input
-                label={"Modelo de la máquina"}
-                onchange={handleInputChange}
-                name={"modelo"}
-              />
-              <div className="flex w-[390px] justify-around flex-col items-center gap-2">
-                <div className="flex gap-2">
-                  <InputCorto
-                    label={"Horas de uso"}
-                    required={true}
-                    onchange={handleInputChange}
-                    name={"horas_uso"}
-                  />
-                  <InputCorto
-                    label={"Precio x Hora"}
-                    placeholder="s/"
-                    onchange={handleInputChange}
-                    name={"precio"}
+              <div>
+                <label htmlFor="">Tipo de maquina</label>
+                <input
+                  type="text"
+                  name="tipo_maquina"
+                  className={inputStlye}
+                  readOnly={true}
+                />
+              </div>
+              <div>
+                <label htmlFor="">Marca de la máquina</label>
+                <input
+                  type="text"
+                  name="marca_maquina"
+                  className={inputStlye}
+                  readOnly={true}
+                />
+              </div>
+              <div>
+                <label htmlFor="">Modelo de maquina</label>
+                <input
+                  type="text"
+                  name="modelo_maquina"
+                  className={inputStlye}
+                  readOnly={true}
+                />
+              </div>
+            </div>
+            {/* Column 3 */}
+          </div>
+          <div className="flex gap-28  items-center">
+            <div className="flex flex-col gap-2">
+              <label>Descripcion del contrato</label>
+              <textarea
+                className="p-2 border-2 border-black resize-none"
+                id=""
+                cols="106"
+                rows="5"
+                {...descripcion}
+                onChange={(event) => {
+                  descripcion.onChange(event);
+                  handleInputChange(descripcion.name, event.target.value);
+                }}
+              ></textarea>
+            </div>
+            <div className="flex flex-col gap-2 ">
+              <div className="flex gap-2">
+                <div className="flex flex-col">
+                  <label htmlFor="">Horas de uso</label>
+                  <input
+                    type="text"
+                    className={shortInput}
+                    {...horas_uso}
+                    onChange={(e) => {
+                      horas_uso.onChange(e);
+                      handleInputChange(horas_uso.name, e.target.value);
+                    }}
                   />
                 </div>
-                <div className=" ms-auto flex justify-center items-center">
-                  <p className="me-5">Monto total </p>
-                  <InputCorto readonly={true} />
+                <div className="flex flex-col">
+                  <label htmlFor="">Precio por hora</label>
+                  <input
+                    type="text"
+                    className={shortInput}
+                    {...precio_hora}
+                    onChange={(e) => {
+                      precio_hora.onChange(e);
+                      handleInputChange(precio_hora.name, e.target.value);
+                    }}
+                  />
+                </div>
+              </div>
+              <div className="flex gap-2 justify-end  ">
+                <div className="flex items-center gap-5">
+                  <label htmlFor="">Monto total</label>
+                  <input className={shortInput} />
                 </div>
               </div>
             </div>
           </div>
-          <div className="flex gap-5">
+          <div className="mt-10">
             <button
-              type="submit"
-              className="rounded-2xl w-[251px] h-[76px] bg-[#234053] text-white text-[30px]"
+              className="w-[251px] bg-[#234053] text-white text-3xl rounded-xl py-4 px-10 mr-6"
+              onClick={() => console.log(formData)}
             >
               Procesar
             </button>
             <button
+              onClick={handlerReset}
               type="button"
-              className="rounded-2xl w-[251px] h-[76px] bg-[#F0EFEF] text-black font-bold text-[30px]"
+              className="w-[251px] bg-[#F0EFEF] text-black text-3xl rounded-xl py-4 px-10"
             >
-              Descartar
+              descartar
             </button>
           </div>
         </form>

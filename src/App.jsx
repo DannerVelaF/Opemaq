@@ -6,7 +6,7 @@ import Dashboard from "./components/Dashboard";
 import Login from "./pages/Login";
 import Registrar from "./pages/Registrar";
 import Maquinaria from "./pages/Maquinaria.jsx";
-// import Almacen from "./pages/Almacen.jsx";
+import Almacen from "./pages/Almacen.jsx";
 
 function App() {
   return (
@@ -17,7 +17,7 @@ function App() {
         <Route element={<Dashboard />} path="/inicio/*">
           <Route path="" element={<Registrar />} />
           <Route path="maquinaria" element={<Maquinaria />} />
-          <Route path="almacen" element={<p>Almacen</p>} />
+          <Route path="almacen" element={<Almacen />} />
         </Route>
       </Routes>
     </BrowserRouter>
