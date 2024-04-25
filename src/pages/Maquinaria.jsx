@@ -1,9 +1,18 @@
-import React, { useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import BarraSuperior from "../components/BarraSuperior";
 import MaquinaIMG from "../assets/maquinaria.jpg";
 import Modal from "../components/Modal";
+import { MaquinaContext } from "../App";
+import { useNavigate } from "react-router-dom";
 function Maquinaria() {
   const [openModal, setOpenModal] = useState(false);
+  const [maquinaSeleccionada, setMaquinaSeleccionada] =
+    useContext(MaquinaContext);
+  const navigate = useNavigate();
+  const handleAlquilar = (maquinaData) => {
+    setMaquinaSeleccionada(maquinaData);
+    navigate("/inicio");
+  };
 
   const handlerOpenModal = () => {
     setOpenModal(!openModal);
@@ -84,6 +93,7 @@ function Maquinaria() {
             >
               Registrar Maquinaria
             </button>
+
             <div className="flex  items-center font-medium text-xl">
               <span className="">Ordenar por: </span>
               <select name="" id="" className="bg-inherit  ps-3  ">
@@ -92,15 +102,15 @@ function Maquinaria() {
               </select>
             </div>
           </div>
+          {/* interfaz de muestra */}
           <div className="p-7">
             <div className="flex items-center justify-between">
               <div className="flex gap-3 items-center flex-1">
-                <img src={MaquinaIMG} width={250} alt="" />
+                <img src={MaquinaIMG} width={250} alt="" className="" />
                 <div className="font-medium text-xl">
                   <p>Tipo: Excavadora</p>
                   <p>Marca: CAT</p>
                   <p>Modelo: XXXXX</p>
-                  <p>Horas de uso total: XX</p>
                   <p>Operador: XXXX</p>
                 </div>
               </div>
@@ -111,7 +121,16 @@ function Maquinaria() {
                   Estado: Disponible
                 </p>
                 <div className="font-medium text-xl text-white">
-                  <button className="py-2 px-8 bg-[#2F4A5B] me-1">
+                  <button
+                    className="py-2 px-8 bg-[#2F4A5B] me-1"
+                    onClick={() =>
+                      handleAlquilar({
+                        tipo_maquina: "Excavadora",
+                        marca_maquina: "Cat",
+                        modelo_maquina: "XXXX",
+                      })
+                    }
+                  >
                     Alquilar
                   </button>
                   <button className="py-2 px-8 bg-[#2F4A5B]">

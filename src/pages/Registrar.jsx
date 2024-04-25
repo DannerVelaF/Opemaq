@@ -1,8 +1,9 @@
-import React, { useEffect, useState } from "react";
+import React, { useContext, useEffect, useState } from "react";
 import BarraSuperior from "../components/BarraSuperior";
-
+import { MaquinaContext } from "../App";
 const useField = ({ placeholder, name, autoComplete = "off", required }) => {
   const [value, setValue] = useState("");
+
   const onChange = (event) => {
     setValue(event.target.value);
   };
@@ -22,14 +23,37 @@ const useField = ({ placeholder, name, autoComplete = "off", required }) => {
 
 function Registrar() {
   const [formData, setFormData] = useState({}); // Estado para almacenar los datos del formulario
-  const [input, setInput] = useState("");
+  const [maquinaSeleccionada, setMaquinaSeleccionada] =
+    useContext(MaquinaContext);
 
-  useEffect(() => {
-    setInput("prueba");
-  }, []);
+  const validar = () => {
+    const campos = [
+      "ruc",
+      "nombre_empresa",
+      "fecha_inicio",
+      "fecha_fin",
+      "correo_empresa",
+      "telefono_empresa",
+      "dirección_empresa",
+      "horas_uso",
+      "precio_hora",
+      "descripcion",
+    ];
+    const vacios = campos.filter((campo) => !formData[campos]);
+    return vacios.length === 0;
+  };
 
   const handleSubmit = (e) => {
     e.preventDefault();
+    setFormData((prevData) => ({
+      ...prevData,
+      tipo_maquina: maquinaSeleccionada?.tipo_maquina || "",
+      marca_maquina: maquinaSeleccionada?.marca_maquina || "",
+      modelo_maquina: maquinaSeleccionada?.modelo_maquina || "",
+    }));
+    if (!validar()) {
+      console.log(formData);
+    }
   };
 
   const handleInputChange = (field, value) => {
@@ -107,6 +131,7 @@ function Registrar() {
     horas_uso.resetvalue();
     precio_hora.resetvalue();
     descripcion.resetvalue();
+    setMaquinaSeleccionada(null);
   };
 
   return (
@@ -258,6 +283,8 @@ function Registrar() {
                   name="tipo_maquina"
                   className={inputStlye}
                   readOnly={true}
+                  value={maquinaSeleccionada?.tipo_maquina || ""}
+                  required={true}
                 />
               </div>
               <div>
@@ -267,6 +294,8 @@ function Registrar() {
                   name="marca_maquina"
                   className={inputStlye}
                   readOnly={true}
+                  value={maquinaSeleccionada?.marca_maquina || ""}
+                  required={true}
                 />
               </div>
               <div>
@@ -276,6 +305,8 @@ function Registrar() {
                   name="modelo_maquina"
                   className={inputStlye}
                   readOnly={true}
+                  value={maquinaSeleccionada?.modelo_maquina || ""}
+                  required={true}
                 />
               </div>
             </div>
@@ -332,10 +363,7 @@ function Registrar() {
             </div>
           </div>
           <div className="mt-10">
-            <button
-              className="w-[251px] bg-[#234053] text-white text-3xl rounded-xl py-4 px-10 mr-6"
-              onClick={() => console.log(formData)}
-            >
+            <button className="w-[251px] bg-[#234053] text-white text-3xl rounded-xl py-4 px-10 mr-6">
               Procesar
             </button>
             <button
