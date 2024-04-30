@@ -44,10 +44,10 @@ function Dashboard() {
             opemaq <br /> construye
           </p>
         </div>
-        <div className="flex flex-1 flex-col justify-center items-center gap-20 ">
+        <div className="h-screen flex flex-1 flex-col justify-center items-center gap-10">
           {opciones.map((op, key) => (
             <div
-              className="flex items-center flex-col justify-center"
+              className="flex items-center flex-col justify-center w-[100%]"
               key={key}
             >
               <Link

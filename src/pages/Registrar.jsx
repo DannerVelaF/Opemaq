@@ -63,8 +63,8 @@ function Registrar() {
     }));
   };
 
-  const inputStlye = "h-14 w-[390px] border-2 border-black ps-[17px] mt-2";
-  const shortInput = "h-[61px] w-[192px] border-2 border-black ps-[17px] mt-2";
+  const inputStlye = "h-10 w-[100%] border-2 ps-[17px] mt-1 border-[#2F4A5B] transition-all duration-300 focus:border-blue-500 focus:outline-none";
+  const shortInput = "h-10 w-[80%] border-2 ps-[17px] mt-2 border-[#2F4A5B] transition-all duration-300 focus:border-blue-500 focus:outline-none";
 
   const ruc = useField({
     placeholder: "Ingrese el RUC de la empresa",
@@ -137,19 +137,19 @@ function Registrar() {
   return (
     <div className=" h-screen flex flex-col">
       <BarraSuperior>Contrato de alquiler</BarraSuperior>
-      <div className="flex-1 ">
+      <div className="flex-1 w-[100%] ">
         <h1 className="font-bold text-3xl ps-10 pt-7">
           Información de contrato
         </h1>
         {/* Form */}
         <form
           action=""
-          className="p-20 flex flex-col gap-2"
+          className="p-2 flex flex-col gap-2 justify-center items-center w-full"
           onSubmit={handleSubmit}
         >
-          <div className="flex gap-28 justify-center items-center">
+          <div className="flex gap-10 justify-center items-center">
             {/* Column 1 */}
-            <div className="flex flex-col gap-6 ">
+            <div className="flex flex-col gap-2 w-[30%]">
               <div className="flex flex-col ">
                 <label>
                   Ruc de la empresa{" "}
@@ -199,7 +199,7 @@ function Registrar() {
                     }}
                   />
                 </div>
-                <div className="flex flex-col">
+                <div className="flex flex-col ">
                   <label htmlFor="">Hora de fin</label>
                   <input
                     type="date"
@@ -216,8 +216,8 @@ function Registrar() {
             {/* Column 1 */}
 
             {/* Column 2 */}
-            <div className="flex flex-col gap-6">
-              <div className="flex flex-col ">
+            <div className="flex flex-col gap-6 w-[30%]">
+              <div className="flex flex-col w-[100%]">
                 <label>
                   Correo electronico de la empresa
                   {correo_empresa.required ? (
@@ -275,7 +275,7 @@ function Registrar() {
             {/* Column 2 */}
 
             {/* Column 3 */}
-            <div className="flex flex-col gap-6">
+            <div className="flex flex-col gap-6 w-[30%]" >
               <div>
                 <label htmlFor="">Tipo de maquina</label>
                 <input
@@ -312,11 +312,11 @@ function Registrar() {
             </div>
             {/* Column 3 */}
           </div>
-          <div className="flex gap-28  items-center">
-            <div className="flex flex-col gap-2">
+          <div className="flex gap-1  items-center w-[90%]">
+            <div className="flex flex-col w-[90%]">
               <label>Descripcion del contrato</label>
               <textarea
-                className="p-2 border-2 border-black resize-none"
+                className="p-2 border-2 border-[#2F4A5B] resize-none mr-[0 0 0 2] w-[95%] h-[100px]"
                 id=""
                 cols="106"
                 rows="5"
@@ -327,7 +327,7 @@ function Registrar() {
                 }}
               ></textarea>
             </div>
-            <div className="flex flex-col gap-2 ">
+            <div className="flex flex-col gap-2">
               <div className="flex gap-2">
                 <div className="flex flex-col">
                   <label htmlFor="">Horas de uso</label>
@@ -362,14 +362,14 @@ function Registrar() {
               </div>
             </div>
           </div>
-          <div className="mt-10">
-            <button className="w-[251px] bg-[#234053] text-white text-3xl rounded-xl py-4 px-10 mr-6">
+          <div className="mt-5">
+            <button className="w-[200px] bg-[#234053] text-white rounded-xl py-3 px-1 mr-6">
               Procesar
             </button>
             <button
               onClick={handlerReset}
               type="button"
-              className="w-[251px] bg-[#F0EFEF] text-black text-3xl rounded-xl py-4 px-10"
+              className="w-[200px] bg-[#F0EFEF] text-black rounded-xl py-3 px-1"
             >
               descartar
             </button>

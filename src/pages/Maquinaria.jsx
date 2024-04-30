@@ -55,6 +55,7 @@ function Maquinaria() {
             handlerOpenModal={handlerOpenModal}
             titulo={"Registrar Maquinaria"}
           >
+            <form>
             <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
               <label>Tipo de maquina</label>
               <input
@@ -82,11 +83,19 @@ function Maquinaria() {
                 {...horas_uso}
                 className="border-2 border-[#CCC6C6] py-3 ps-3 w-[327px] text-lg"
               />
+            </div>  
+            <div className="flex justify-end">
+              <button
+                className="bg-[#283B4A] font-medium text-2xl text-white py-3 px-6 rounded-3xl"
+              >
+                Agregar
+              </button>
             </div>
+            </form>
           </Modal>
         )}
-        <div className="w-[1443px] min-h-[780px] bg-[#FAFAFA] ">
-          <div className="flex justify-between bg-[#F1F5F9] py-4 px-10">
+        <div className="w-[100%] h-[80vh] bg-[#FAFAFA] overflow-y-auto">
+          <div className="flex justify-between bg-[#F1F5F9] py-4 px-10 ">
             <button
               className="bg-[#2F4A5B] px-8 py-2 text-white rounded-xl"
               onClick={handlerOpenModal}
@@ -103,8 +112,8 @@ function Maquinaria() {
             </div>
           </div>
           {/* interfaz de muestra */}
-          <div className="p-7">
-            <div className="flex items-center justify-between">
+          <div className="p-7 ">
+            <div className="flex items-center justify-between mt-1">
               <div className="flex gap-3 items-center flex-1">
                 <img src={MaquinaIMG} width={250} alt="" className="" />
                 <div className="font-medium text-xl">
@@ -139,6 +148,7 @@ function Maquinaria() {
                 </div>
               </div>
             </div>
+            
           </div>
         </div>
       </div>
