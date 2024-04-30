@@ -7,7 +7,7 @@ const useField = ({ placeholder, name, autoComplete = "off", required }) => {
   const onChange = (event) => {
     setValue(event.target.value);
   };
-  const resetvalue = () => {
+  const resetValue = () => {
     setValue("");
   };
   return {
@@ -17,7 +17,6 @@ const useField = ({ placeholder, name, autoComplete = "off", required }) => {
     onChange,
     autoComplete,
     required,
-    resetvalue,
   };
 };
 
@@ -121,16 +120,16 @@ function Registrar() {
   });
 
   const handlerReset = () => {
-    ruc.resetvalue();
-    empresa.resetvalue();
-    fecha_inicio.resetvalue();
-    fecha_fin.resetvalue();
-    correo_empresa.resetvalue();
-    telefono_empresa.resetvalue();
-    direccion_empresa.resetvalue();
-    horas_uso.resetvalue();
-    precio_hora.resetvalue();
-    descripcion.resetvalue();
+    ruc.resetValue();
+    empresa.resetValue();
+    fecha_inicio.resetValue();
+    fecha_fin.resetValue();
+    correo_empresa.resetValue();
+    telefono_empresa.resetValue();
+    direccion_empresa.resetValue();
+    horas_uso.resetValue();
+    precio_hora.resetValue();
+    descripcion.resetValue();
     setMaquinaSeleccionada(null);
   };
 

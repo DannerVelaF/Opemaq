@@ -59,7 +59,7 @@ const FormSide = () => {
               className={inputStyle}
               id="user"
               required={true}
-              autoComplete={false}
+              autoComplete="off"
             />
           </div>
           <div className="flex flex-col w-[430px] mt-[40px]">

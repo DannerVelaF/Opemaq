@@ -9,9 +9,9 @@ function Maquinaria({ width = 20, color }) {
       version="1.1"
       id="Icons"
       xmlns="http://www.w3.org/2000/svg"
-      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlnsXlink="http://www.w3.org/1999/xlink"
       viewBox="0 0 32 32"
-      xml:space="preserve"
+      xmlSpace="preserve"
     >
       <path
         d="M29.7,23.3L28,21.6V20c0-3.3-1.3-6.2-3.5-8.5L23,18.2c-0.1,0.5-0.5,0.8-1,0.8c-0.1,0-0.1,0-0.2,0c-0.5-0.1-0.9-0.7-0.8-1.2
