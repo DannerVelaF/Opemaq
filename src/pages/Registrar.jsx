@@ -17,6 +17,7 @@ const useField = ({ placeholder, name, autoComplete = "off", required }) => {
     onChange,
     autoComplete,
     required,
+    resetValue,
   };
 };
 
