@@ -1,43 +1,29 @@
 import React, { useState } from "react";
 
-const useField = ({ type, placeholder }) => {
-  const [value, setValue] = useState("");
-  const onChange = (event) => {
-    setValue(event.target.value);
-  };
-  const clearValue = () => {
-    setValue("");
-  };
-  return {
-    type,
-    placeholder,
-    value,
-    onChange,
-    clearValue,
-  };
-};
-
 function Almacen() {
-  const usuario = useField({ type: "text", placeholder: "Ingresa el usuario" });
-  const usuario2 = useField({
-    type: "text",
-    placeholder: "Ingresa el usuario2",
-  });
-  const usuario3 = useField({
-    type: "text",
-    placeholder: "Ingresa el usuario3",
-  });
+  const [image, setImage] = useState("");
+  const [selected, setSelected] = useState(null);
 
-  const handlerClear = () => {
-    usuario.clearValue();
+  const handlerChange = (e) => {
+    const file = e.target.files[0];
+    z;
+    console.log(file);
+    console.log(URL.createObjectURL(file));
+    setImage(URL.createObjectURL(file));
+    setSelected(file);
   };
+
   return (
     <div>
-      <label htmlFor="">Prueba</label>
-      <input {...usuario} />
-      <input {...usuario2} />
-      <input {...usuario3} />
-      <button onClick={handlerClear}>clear</button>
+      <input
+        type="file"
+        className="border-2"
+        onChange={handlerChange}
+        placeholder="Ingresa imagen"
+      />
+      <input />
+
+      {selected && <img src={image} />}
     </div>
   );
 }

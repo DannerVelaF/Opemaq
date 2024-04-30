@@ -7,25 +7,38 @@ function Modal({ titulo, handlerOpenModal, children }) {
     marca_maquina: "",
     modelo_maquina: "",
     horas_uso: "",
+    imagen_maquina: "",
+    operador: "",
+    estado: true,
   });
 
   const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormValues((prevValues) => ({
-      ...prevValues,
-      [name]: value,
-    }));
+    const { name, value, files } = e.target;
+    if (files) {
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        [name]: files[0].name,
+      }));
+    } else {
+      setFormValues((prevValues) => ({
+        ...prevValues,
+        [name]: value,
+      }));
+    }
   };
 
   const handleRegistrar = () => {
-    // Aquí puedes imprimir los valores o realizar otra acción
-    console.log("Valores ingresados:", formValues);
-    // Cerrar el modal
+    const valuesArray = Object.values(formValues);
+    if (valuesArray.some((value) => value === "")) {
+      console.log("Por favor completa todos los campos antes de enviar.");
+      return;
+    }
+    console.log(formValues);
     handlerOpenModal();
   };
 
   return (
-    <div className="z-50 absolute w-[605px]  bg-white p-7 rounded-2xl">
+    <div className="z-50 absolute   bg-white p-7 rounded-2xl">
       <button
         onClick={handlerOpenModal}
         className="absolute right-0 top-0 p-2 bg-[#E5E7EB] rounded-full m-2"
@@ -43,6 +56,17 @@ function Modal({ titulo, handlerOpenModal, children }) {
           }
           return child;
         })}
+        <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
+          <label>Operador</label>
+          <select
+            name="operador"
+            value={formValues.operador}
+            onChange={handleChange}
+          >
+            <option value="">Seleccione un operador</option>
+            <option value="1">Jhon Mendoza</option>
+          </select>
+        </div>
       </div>
       <div className="flex justify-end">
         <button

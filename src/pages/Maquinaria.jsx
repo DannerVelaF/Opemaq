@@ -23,24 +23,45 @@ function Maquinaria() {
     name: "tipo_maquina",
     placeholder: "Tipo de maquina",
     autoComplete: "off",
+    require: true,
   };
   const marca_maquina = {
     type: "text",
-    name: "tipo_maquina",
+    name: "marca_maquina",
     placeholder: "Tipo de maquina",
     autoComplete: "off",
+    require: true,
   };
   const modelo_maquina = {
     type: "text",
-    name: "tipo_maquina",
+    name: "modelo_maquina",
     placeholder: "Tipo de maquina",
     autoComplete: "off",
+    require: true,
   };
   const horas_uso = {
     type: "text",
-    name: "tipo_maquina",
+    name: "horas_uso",
     placeholder: "Tipo de maquina",
     autoComplete: "off",
+    require: true,
+  };
+
+  const imagen = {
+    type: "file",
+    name: "imagen_maquina",
+    placeholder: "Ingresa imagen",
+    autoComplete: "off",
+    id: "imagen",
+    require: true,
+  };
+
+  const cant_aceite = {
+    type: "text",
+    name: "cantidad_aceite",
+    placeholder: "Ingresa la cantidad de aceite",
+    autoComplete: "off",
+    require: true,
   };
 
   return (
@@ -55,33 +76,47 @@ function Maquinaria() {
             handlerOpenModal={handlerOpenModal}
             titulo={"Registrar Maquinaria"}
           >
-            <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
-              <label>Tipo de maquina</label>
-              <input
-                {...tipo_maquina}
-                className="text-lg border-2 border-[#CCC6C6] py-3 ps-3 w-[327px]"
-              />
-            </div>
-            <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
-              <label>Marca</label>
-              <input
-                {...marca_maquina}
-                className="text-lg border-2 border-[#CCC6C6] py-3 ps-3 w-[327px]"
-              />
-            </div>
-            <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
-              <label>Modelo</label>
-              <input
-                {...modelo_maquina}
-                className="border-2 border-[#CCC6C6] py-3 ps-3 w-[327px] text-lg"
-              />
-            </div>
-            <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
-              <label>Horas de uso</label>
-              <input
-                {...horas_uso}
-                className="border-2 border-[#CCC6C6] py-3 ps-3 w-[327px] text-lg"
-              />
+            <div className="flex flex-col gap-6">
+              <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
+                <label>Tipo de maquina</label>
+                <input
+                  {...tipo_maquina}
+                  className="text-lg border-2 border-[#CCC6C6] py-3 ps-3 w-[327px]"
+                />
+              </div>
+              <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
+                <label>Marca</label>
+                <input
+                  {...marca_maquina}
+                  className="text-lg border-2 border-[#CCC6C6] py-3 ps-3 w-[327px]"
+                />
+              </div>
+              <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
+                <label>Modelo</label>
+                <input
+                  {...modelo_maquina}
+                  className="border-2 border-[#CCC6C6] py-3 ps-3 w-[327px] text-lg"
+                />
+              </div>
+              <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
+                <label>Horas de uso</label>
+                <input
+                  {...horas_uso}
+                  className="border-2 border-[#CCC6C6] py-3 ps-3 w-[327px] text-lg"
+                />
+              </div>
+              <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
+                <label>Cantidad Aceite</label>
+                <input
+                  {...cant_aceite}
+                  className="border-2 border-[#CCC6C6] py-3 ps-3 w-[327px] text-lg"
+                />
+              </div>
+
+              <div className="flex gap-4 text-xl text-[#131216] items-center justify-between">
+                <label>Imagen maquinaria</label>
+                <input {...imagen} className=" py-3 ps-3 w-[327px] text-lg" />
+              </div>
             </div>
           </Modal>
         )}
@@ -96,8 +131,8 @@ function Maquinaria() {
 
             <div className="flex  items-center font-medium text-xl">
               <span className="">Ordenar por: </span>
-              <select name="" id="" className="bg-inherit  ps-3  ">
-                <option value="nombre">Nombre</option>
+              <select id="" className="bg-inherit ">
+                <option value="nombre">Tipo</option>
                 <option value="marca">Marca</option>
               </select>
             </div>

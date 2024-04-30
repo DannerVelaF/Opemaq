@@ -363,15 +363,15 @@ function Registrar() {
             </div>
           </div>
           <div className="mt-10">
-            <button className="w-[251px] bg-[#234053] text-white text-3xl rounded-xl py-4 px-10 mr-6">
+            <button className="w-[251px] bg-[#234053] font-bold text-white text-3xl rounded-xl py-4 px-10 mr-6">
               Procesar
             </button>
             <button
               onClick={handlerReset}
               type="button"
-              className="w-[251px] bg-[#F0EFEF] text-black text-3xl rounded-xl py-4 px-10"
+              className="w-[251px] bg-[#F0EFEF] font-bold text-black text-3xl rounded-xl py-4 px-10"
             >
-              descartar
+              Descartar
             </button>
           </div>
         </form>
