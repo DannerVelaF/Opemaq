@@ -122,10 +122,10 @@ const Almacen = () => {
   };
 
   const handlerOpenModalEditar = (producto) => {
-    setProductoEditado(producto);
-    setCategoriaSeleccionada(producto.categoriaID.toString());
-    setOpenModalEditar(true); 
-    setOpenModalEditar(!openModalEditar);
+    setOpenModalEditar(false);
+    setNombreProducto(""); 
+    setCantidad(""); 
+    setError(null); 
   };  
 
   const handlerOpenModalEntregar = (material) => {
@@ -377,58 +377,60 @@ const Almacen = () => {
         {openModalEntregar && (
           <div className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-40" onClick={handlerCloseModalEntregar}></div>
         )}
-        {openModalEditar && productoEditado && (
-          <Modal
-            handlerOpenModal={handlerOpenModalEditar}
-            titulo={"Editar Material"}
-          >
-            <form onSubmit={handleActualizarMaterial}>
-              <div className="flex flex-col gap-4">
-                <label htmlFor="nombreProducto">Nombre del Producto:</label>
-                <input
-                  type="text"
-                  id="nombreProducto"
-                  value={productoEditado.nombreProducto}
-                  onChange={(e) => setProductoEditado({ ...productoEditado, nombreProducto: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 rounded-md"
-                  required
-                />
+       {openModalEditar && productoEditado  !== undefined &&(
+  <Modal
+    handlerOpenModal={handlerOpenModalEditar}
+    titulo={"Editar Material"}
+  >
+    <form onSubmit={handleActualizarMaterial}>
+      <div className="flex flex-col gap-4">
+        <label htmlFor="nombreProducto">Nombre del Producto:</label>
+        <input
+          type="text"
+          id="nombreProducto"
+          value={productoEditado.nombreProducto}
+          onChange={(e) => setProductoEditado({ ...productoEditado, nombreProducto: e.target.value })}
+          className="px-4 py-2 border border-gray-300 rounded-md"
+          required
+        />
 
-                <label htmlFor="cantidad">Cantidad:</label>
-                <input
-                  type="number"
-                  id="cantidad"
-                  value={productoEditado.cantidad}
-                  onChange={(e) => setProductoEditado({ ...productoEditado, cantidad: e.target.value })}
-                  className="px-4 py-2 border border-gray-300 rounded-md"
-                  required
-                />
+        <label htmlFor="cantidad">Cantidad:</label>
+        <input
+          type="number"
+          id="cantidad"
+          value={productoEditado.cantidad}
+          onChange={(e) => setProductoEditado({ ...productoEditado, cantidad: e.target.value })}
+          className="px-4 py-2 border border-gray-300 rounded-md"
+          required
+        />
 
-                <label htmlFor="categoria">Categoría:</label><select
-                  id="categoria"
-                  value={categoriaSeleccionada}
-                  onChange={handleCategoriaChange}
-                  className="px-4 py-2 border border-gray-300 rounded-md"
-                  required
-                >
-                  <option value="" disabled>-- Seleccione una categoría --</option>
-                  {categorias.map((categoria) => (
-                    <option key={categoria.categoriaID} value={categoria.categoriaID}>
-                      {categoria.nombre}
-                    </option>
-                  ))}
-                </select>
+        <label htmlFor="categoria">Categoría:</label>
+        <select
+          id="categoria"
+          value={categoriaSeleccionada}  // <-- Aquí está el posible origen del error
+          onChange={handleCategoriaChange}
+          className="px-4 py-2 border border-gray-300 rounded-md"
+          required
+        >
+          <option value="" disabled>-- Seleccione una categoría --</option>
+          {categorias.map((categoria) => (
+            <option key={categoria.categoriaID} value={categoria.categoriaID}>
+              {categoria.nombre}
+            </option>
+          ))}
+        </select>
 
-              </div>
-              <button
-                type="submit"
-                className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md w-[100%] mt-4"
-              >
-                Actualizar Producto
-              </button>
-            </form>
-          </Modal>
-        )}
+      </div>
+      <button
+        type="submit"
+        className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md w-[100%] mt-4"
+      >
+        Actualizar Producto
+      </button>
+    </form>
+  </Modal>
+)}
+
         {openModalEntregar && (
             <Modal
                 handlerOpenModal={handlerCloseModalEntregar}
