@@ -181,9 +181,9 @@ function Maquinaria() {
   };
 
   useEffect(() => {
+    ObtenerOperadores();
     ObtenerMarcas();
     ObtenerTipos();
-    ObtenerOperadores();
     ObtenerMaquinas();
   }, []);
 
@@ -328,7 +328,7 @@ function Maquinaria() {
             </div>
           </div>
           {/* interfaz de muestra */}
-          <div className="p-7 flex flex-col gap-7  max-h-[700px] overflow-y-scroll">
+          <div className="p-7 flex flex-col gap-7 flex-1 min-h-[700px] overflow-y-scroll">
             {maquinas.map((maquina) => (
               <div
                 key={maquina.maquinaID}
@@ -342,10 +342,10 @@ function Maquinaria() {
                     className=""
                   />
                   <div className="font-medium text-xl">
-                    <p>Tipo: Excavadora</p>
-                    <p>Marca: CAT</p>
-                    <p>Modelo: XXXXX</p>
-                    <p>Operador: XXXX</p>
+                    <p>Tipo: {maquina.tipoMaquinaria}</p>
+                    <p>Marca: {maquina.marca}</p>
+                    <p>Modelo: {maquina.modelo}</p>
+                    <p>Operador: {maquina.trabajador}</p>
                   </div>
                 </div>
                 <hr className="border-2 rotate-90 w-44" />
@@ -359,9 +359,9 @@ function Maquinaria() {
                       className="py-2 px-8 bg-[#2F4A5B] mt-1"
                       onClick={() =>
                         handleAlquilar({
-                          tipo_maquina: "Excavadora",
-                          marca_maquina: "Cat",
-                          modelo_maquina: "XXXX",
+                          tipo_maquina: maquina.tipoMaquinaria,
+                          marca_maquina: maquina.marca,
+                          modelo_maquina: maquina.modelo,
                         })
                       }
                     >

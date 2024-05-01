@@ -29,7 +29,7 @@ const FormSide = () => {
       const headers = { "Content-Type": "application/json" };
       const response = await axios.post(endpoint, data, { headers });
       if (response.status === 200 || response.status === 202) {
-        navigate("/inicio");
+        navigate("/inicio/registrar");
       } else if (response.status === 404) {
         throw new Error("El usuario no existe");
       } else {

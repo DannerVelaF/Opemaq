@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import { Link, Outlet } from "react-router-dom";
+import { Link, Outlet, NavLink } from "react-router-dom";
 import Logo from "../assets/Empresa-logo.webp";
 
 import Contract from "../assets/dashboard icons/Contrato";
@@ -15,7 +15,7 @@ function Dashboard() {
     {
       icon: <Contract width={46} color={"#ffff"} />,
       text: "Registrar Contrato",
-      to: "",
+      to: "registrar",
     },
     {
       icon: <Maquinaria width={46} color={"#ffff"} />,
@@ -34,6 +34,12 @@ function Dashboard() {
     },
   ];
 
+  const activeLink = ({ isActive }) => {
+    return {
+      background: isActive ? "#255d79" : "",
+    };
+  };
+
   return (
     <div className="h-screen flex w-full ">
       {/* Dashboard */}
@@ -50,12 +56,13 @@ function Dashboard() {
               className="flex items-center flex-col justify-center"
               key={key}
             >
-              <Link
+              <NavLink
                 to={op.to}
                 className=" bg-[#234053] hover:bg-[#277193] active:bg-[#255d79] w-[66px] h-[66px] flex justify-center items-center rounded-[15px]"
+                style={activeLink}
               >
                 {op.icon}
-              </Link>
+              </NavLink>
               <p className="text-[#2F4A5B] font-bold">{op.text}</p>
             </div>
           ))}
