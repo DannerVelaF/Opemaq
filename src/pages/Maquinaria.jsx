@@ -4,16 +4,15 @@ import MaquinaIMG from "../assets/maquinaria.jpg";
 import Modal from "../components/Modal";
 import { MaquinaContext } from "../App";
 import { useNavigate } from "react-router-dom";
+import axios from "axios";
+import Swal from "sweetalert2";
+
 function Maquinaria() {
   const [error, setError] = useState("");
   const [openModal, setOpenModal] = useState(false);
-  const [maquinaSeleccionada, setMaquinaSeleccionada] =
-    useContext(MaquinaContext);
-
+  const [maquinaSeleccionada, setMaquinaSeleccionada] = useContext(MaquinaContext);
   const navigate = useNavigate();
-
   const [formValues, setFormValues] = useState({});
-
   const [marcas, setMarcas] = useState([]);
   const [tipos, setTipos] = useState([]);
   const [operadores, setOperadores] = useState([]);
@@ -50,34 +49,59 @@ function Maquinaria() {
       console.log("Por favor completa todos los campos antes de enviar.");
       return;
     }
-    console.log(formValues);
+  
+    const registroMaquinaria = {
+      maquinariaID: formValues.maquinaID,
+      tipoMaquinariaID: parseInt(formValues.tipoMaquinariaID),
+      marcaID: parseInt(formValues.marcaID),
+      modelo: formValues.modelo,
+      imagen: formValues.imagen,
+      cantidadAceite: parseFloat(formValues.cantidad_aceite),
+      trabajadorID: parseInt(formValues.trabajadorID),
+    };
+  
     try {
       const response = await fetch("http://localhost:8080/api/maquinas", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(formValues),
+        body: JSON.stringify(registroMaquinaria),
       });
       const responseText = await response.text();
       console.log("Respuesta del servidor:", responseText);
-      if (!response.ok) {
-        try {
-          const errorData = await response.json();
-          console.error("Error en la solicitud:", errorData);
-        } catch (error) {
-          console.error("Error al analizar la respuesta JSON:", error);
-        }
-        // throw new Error("Error al registrar maquina");
-        return;
+      if(response.ok){
+        Swal.fire({
+          icon: 'success',
+          title: 'Registro exitoso',
+          text: 'Se registro el nuevo equipo.',
+          confirmButtonColor: '#2F4A5B',
+        });
+          
+        setFormValues({});
+        ObtenerMaquinas();
+        handlerOpenModal();
+      }else {
+        const error = await response.text();
+        Swal.fire({
+          icon: 'error',
+          title: 'Error al registrar el nuevo equipo',
+          text: error || 'Ha ocurrido un error al registrar el nuevo equipo',
+          confirmButtonColor: '#2F4A5B',
+        });
       }
     } catch (error) {
-      console.log(error);
+      console.log("Error al registrar el nuevo equipo:", error);
+      Swal.fire({
+        icon: 'error',
+        title: 'Error al registrar el nuevo equipo',
+        text: error || 'Ha ocurrido un error al registrar el nuevo equipo',
+        confirmButtonColor: '#2F4A5B',
+      });
     }
 
-    setFormValues({});
-    handlerOpenModal();
   };
+  
 
   const vin = {
     type: "text",
@@ -329,60 +353,56 @@ function Maquinaria() {
           </div>
           {/* interfaz de muestra */}
           <div className="p-7  overflow-hidden">
-          <div className="overflow-y-scroll flex flex-col gap-7 flex-1" style={{ maxHeight: "60vh" }}>
-  {maquinas.map((maquina) => (
-    <div key={maquina.maquinaID} className="flex items-center justify-between rounded-lg shadow-md p-4">
-      <div className="flex gap-3 items-center flex-1" style={{ width: "80%" }}>
-        <img
-          src={"https://www.finning.com/content/dam/finning/es/Images/Interiores/Secciones/Empresa/Noticias/Noticias_FINSA/420F2_560x394.jpg"}
-          width={250}
-          alt=""
-          className="rounded-md"
-        />
-        <div className="font-medium text-xl" style={{ width: "100%" }}>
-          <p className="text-gray-800">Tipo: {maquina.tipoMaquinaria}</p>
-          <p className="text-gray-800">Marca: {maquina.marca}</p>
-          <p className="text-gray-800">Modelo: {maquina.modelo}</p>
-          <p className="text-gray-800">Operador: {maquina.trabajador + " " + maquina.apellidoTrabajador}</p>
-        </div>
-      </div>
-      <hr className="border-2 rotate-90 w-44 self-center" />
-      <div className="flex-1 flex items-center flex-col justify-center" style={{ width: "20%" }}>
-        {maquina.estado ? (
-          <p className="text-xl relative px-4 flex text-red-500 font-bold">
-            <span className="absolute rounded-full w-3 h-3 bg-red-500 top-0 left-0 translate-y-[50%]"></span>
-            <span className="ml-2">Alquilada o en mantenimiento</span>
-          </p>
-        ) : (
-          <p className="text-xl relative px-4 flex text-green-500 font-bold">
-            <span className="absolute rounded-full w-3 h-3 bg-green-500 top-0 left-0 translate-y-[50%]"></span>
-            <span className="ml-2">Disponible</span>
-          </p>
-        )}
-        {!maquina.estado && (
-          <div className="font-medium text-xl text-white">
-            <button
-              className="py-2 px-8 bg-[#2F4A5B] mt-1 rounded-md text-white shadow-md hover:bg-opacity-80 transition duration-300"
-              onClick={() =>
-                handleAlquilar({
-                  tipo_maquina: maquina.tipoMaquinaria,
-                  marca_maquina: maquina.marca,
-                  modelo_maquina: maquina.modelo,
-                })
-              }
-            >
-              Alquilar
-            </button>
-          </div>
-        )}
-      </div>
-    </div>
-  ))}
-</div>
-
-
-
-
+            <div className="overflow-y-scroll flex flex-col gap-7 flex-1" style={{ maxHeight: "60vh" }}>
+              {maquinas.map((maquina) => (
+                <div key={maquina.maquinaID} className="flex items-center justify-between rounded-lg shadow-md p-4">
+                  <div className="flex gap-3 items-center flex-1" style={{ width: "80%" }}>
+                    <img
+                      src={"https://www.finning.com/content/dam/finning/es/Images/Interiores/Secciones/Empresa/Noticias/Noticias_FINSA/420F2_560x394.jpg"}
+                      width={250}
+                      alt=""
+                      className="rounded-md"
+                    />
+                    <div className="font-medium text-xl" style={{ width: "100%" }}>
+                      <p className="text-gray-800">Tipo: {maquina.tipoMaquinaria}</p>
+                      <p className="text-gray-800">Marca: {maquina.marca}</p>
+                      <p className="text-gray-800">Modelo: {maquina.modelo}</p>
+                      <p className="text-gray-800">Operador: {maquina.trabajador + " " + maquina.apellidoTrabajador}</p>
+                    </div>
+                  </div>
+                  <hr className="border-2 rotate-90 w-44 self-center" />
+                  <div className="flex-1 flex items-center flex-col justify-center" style={{ width: "20%" }}>
+                    {maquina.estado ? (
+                      <p className="text-xl relative px-4 flex text-red-500 font-bold">
+                        <span className="absolute rounded-full w-3 h-3 bg-red-500 top-0 left-0 translate-y-[50%]"></span>
+                        <span className="ml-2">Alquilada o en mantenimiento</span>
+                      </p>
+                    ) : (
+                      <p className="text-xl relative px-4 flex text-green-500 font-bold">
+                        <span className="absolute rounded-full w-3 h-3 bg-green-500 top-0 left-0 translate-y-[50%]"></span>
+                        <span className="ml-2">Disponible</span>
+                      </p>
+                    )}
+                    {!maquina.estado && (
+                      <div className="font-medium text-xl text-white">
+                        <button
+                          className="py-2 px-8 bg-[#2F4A5B] mt-1 rounded-md text-white shadow-md hover:bg-opacity-80 transition duration-300"
+                          onClick={() =>
+                            handleAlquilar({
+                              tipo_maquina: maquina.tipoMaquinaria,
+                              marca_maquina: maquina.marca,
+                              modelo_maquina: maquina.modelo,
+                            })
+                          }
+                        >
+                          Alquilar
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>

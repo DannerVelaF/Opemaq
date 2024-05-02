@@ -145,7 +145,7 @@ const Almacen = () => {
 
   const handleCategoriaChange = (event) => {
     setCategoriaSeleccionada(event.target.value);
-  };
+  }; 
 
   const handleSubmit = async (event) => {
     event.preventDefault();
@@ -174,30 +174,34 @@ const Almacen = () => {
   const handleAgregarMaterial = async (event) => {
     event.preventDefault();
     try {
-      const response = await fetch("http://localhost:8080/api/productos", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({
-          nombreProducto,
-          cantidad: parseInt(cantidad),
-          categoriaID: parseInt(categoriaSeleccionada),
-        }),
-      });
-  
-      if (!response.ok) {
-        throw new Error("Error al agregar material");
-      }
-  
-      const data = await response.json();
-      setMateriales((prevMateriales) => [...prevMateriales, data]);
-      resetForm();
-      obtenerMateriales();
+        const materialData = {
+            "nombreProducto": nombreProducto,
+            "cantidad": parseInt(cantidad),
+            "categoriaID": parseInt(categoriaSeleccionada),
+        };
+        const response = await fetch("http://localhost:8080/api/productos", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json",
+            },
+            body: JSON.stringify(materialData),
+        });
+        if (nombreProducto.trim() === "" || cantidad.trim() === "") {
+            throw new Error("Por favor complete todos los campos.");
+        }
+        if (!response.ok) {
+            throw new Error("Error al agregar material");
+        }
+        const data = await response.json();
+        setMateriales((prevMateriales) => [...prevMateriales, data]);
+        resetForm();
+        obtenerMateriales();
     } catch (error) {
-      setError(`Error al agregar material: ${error.message}`);
+        setError(`Error al agregar material: ${error.message}`);
     }
   };
+
+
   
   const resetForm = () => {
     setOpenModalAgregar(false);
@@ -531,20 +535,22 @@ const Almacen = () => {
                 />
 
                 <label htmlFor="categoria">Categoría:</label>
-                  <select
-                    id="categoria"
-                    value={categoriaSeleccionada}
-                    onChange={handleCategoriaChange}
-                    className="px-4 py-2 border border-gray-300 rounded-md"
-                    required
-                  >
-                    <option value="" disabled defaultValue>-- Seleccione una categoría --</option>
-                    {categorias.map((categoria) => (
-                      <option key={categoria.categoriaID} value={categoria.categoriaID}>
-                        {categoria.nombre}
-                      </option>
-                    ))}
-                  </select>
+                <select
+  id="categoria"
+  value={categoriaSeleccionada}
+  onChange={handleCategoriaChange}
+  className="px-4 py-2 border border-gray-300 rounded-md"
+  required
+>
+  <option value="" disabled>-- Seleccione una categoría --</option>
+  {categorias.map((categoria) => (
+    <option key={categoria.categoriaID} value={categoria.categoriaID}>
+      {categoria.nombre}
+    </option>
+  ))}
+</select>
+
+
               </div>
               <button
                 type="submit"
