@@ -4,34 +4,35 @@ import Modal from "../components/Modal";
 import Swal from "sweetalert2";
 import { FaTrash, FaEdit, FaTruck } from "react-icons/fa";
 
-function Almacen() {
-  //* Almacena la consulta a la bd
+const Almacen = () => {
   const [materiales, setMateriales] = useState([]);
-
   const [busqueda, setBusqueda] = useState("");
   const [error, setError] = useState(null);
-  // Manejardor modal
   const [openModalAgregar, setOpenModalAgregar] = useState(false);
   const [openModalEditar, setOpenModalEditar] = useState(false);
-  const [openModalEntregar, setOpenModalEntregar] = useState(false);
-
   const [nombreProducto, setNombreProducto] = useState("");
+  const [openModalEntregar, setOpenModalEntregar] = useState(false);
   const [productoSeleccionado, setProductoSeleccionado] = useState(null);
-  const [mantenimientos, setMantenimientos] = useState([]);
   const [cantidad, setCantidad] = useState("");
   const [categorias, setCategorias] = useState([]);
   const [productoEditado, setProductoEditado] = useState(null);
   const [categoriaSeleccionada, setCategoriaSeleccionada] = useState("");
   const [maquinas, setMaquinas] = useState([]);
-  const [mantenimientoSeleccionado, setMantenimientoSeleccionado] = useState(
-    {}
-  );
-  const [maquinariaSeleccionada, setMaquinariaSeleccionada] = useState("");
+  const [tipoMantenimiento, setTipoMantenimiento] = useState([]);
+  const [tipoMantenimientoSeleccionado, setTipoMantenimientoSeleccionado] =
+    useState("");
+  const [mantenimientoSeleccionado, setMantenimientoSeleccionado] =
+    useState(null);
+  const [maquinariaSeleccionada, setMaquinariaSeleccionada] = useState(null);
+  const [mantenimientos, setMantenimientos] = useState([]);
+  const [horometro, setHorometro] = useState("");
 
   useEffect(() => {
     obtenerMateriales();
     obtenerCategorias();
     obtenerMantenimientos();
+    obtenerTiposMantenimiento();
+    obtenerMaquinas();
   }, []);
 
   const obtenerMateriales = async () => {
@@ -55,11 +56,8 @@ function Almacen() {
       if (!response.ok) {
         throw new Error("Error al obtener las categorías de la API");
       }
-
       const data = await response.json();
       setCategorias(data);
-
-      // Después de obtener los datos de las categorías, establecemos categoriaSeleccionada
       if (data.length > 0) {
         setCategoriaSeleccionada(data[0].categoriaID.toString());
       }
@@ -75,19 +73,13 @@ function Almacen() {
         throw new Error("Error al obtener los datos de los mantenimientos");
       }
       const data = await response.json();
-
-      // Construir objetos con modelo de máquina y horómetro
       const maquinasConHorometro = data.map((mantenimiento) => ({
         maquinariaID: mantenimiento.maquinariaID,
         horometroMantenimiento: mantenimiento.horometroMantenimiento,
       }));
-
-      // Obtener la lista de máquinas únicas
       const maquinasUnicas = Array.from(
         new Set(maquinasConHorometro.map((maquina) => maquina.maquinariaID))
       );
-
-      // Construir objetos con el modelo de máquina y horómetro para mostrar en el select
       const maquinasConHorometroUnicas = maquinasUnicas.map((maquina) => {
         const mantenimientosMaquina = maquinasConHorometro.filter(
           (m) => m.maquinariaID === maquina
@@ -102,7 +94,6 @@ function Almacen() {
           horometroPromedio: horometroPromedio.toFixed(2),
         };
       });
-
       setMaquinas(maquinasConHorometroUnicas);
       setMantenimientos(data);
     } catch (error) {
@@ -112,25 +103,54 @@ function Almacen() {
     }
   };
 
-  const handlerOpenModalAgregar = () => {
-    setOpenModalAgregar(!openModalAgregar);
-    setProductoEditado(null); // Resetear el producto editado al abrir/cerrar el modal
+  const obtenerMaquinas = async () => {
+    try {
+      const response = await fetch("http://localhost:8080/api/maquinas");
+      if (!response.ok) {
+        throw new Error("Error al obtener las máquinas");
+      }
+      const data = await response.json();
+      setMaquinas(data);
+    } catch (error) {
+      setError("Error al obtener las máquinas: " + error.message);
+    }
   };
 
-  const handlerOpenModalEditar = () => {
-    setOpenModalEditar(!openModalEditar);
+  const obtenerTiposMantenimiento = async () => {
+    try {
+      const response = await fetch(
+        "http://localhost:8080/api/tipo_mantenimiento"
+      );
+      if (!response.ok) {
+        throw new Error("Error al obtener los tipos de mantenimiento");
+      }
+      const data = await response.json();
+      setTipoMantenimiento(data);
+    } catch (error) {
+      setError("Error al obtener los tipos de mantenimiento: " + error.message);
+    }
+  };
+
+  const handlerOpenModalAgregar = () => {
+    setOpenModalAgregar(!openModalAgregar);
+    setProductoEditado(null);
+  };
+
+  const handlerOpenModalEditar = (producto) => {
+    setOpenModalEditar(false);
+    setNombreProducto("");
+    setCantidad("");
+    setError(null);
   };
 
   const handlerOpenModalEntregar = (material) => {
     setProductoSeleccionado(material);
-    setMantenimientoSeleccionado(material.mantenimientoID); // Esto se mantiene igual
-    setMaquinariaSeleccionada(material.maquinariaID); // Cambiamos esto para que sea el ID de la maquinaria
     setOpenModalEntregar(true);
   };
 
   const handlerCloseModalEntregar = () => {
     setOpenModalEntregar(false);
-    setCantidad(""); // Corregir la llamada a la función setCantidad
+    setCantidad("");
     setMantenimientoSeleccionado("");
   };
 
@@ -153,7 +173,15 @@ function Almacen() {
           throw new Error("Error al buscar productos");
         }
         const data = await response.json();
-        setMateriales(data);
+        if (data.length === 0) {
+          setError(
+            "No se encontraron productos con el término de búsqueda ingresado."
+          );
+        } else {
+          setMateriales(data);
+          setError(null);
+          setBusqueda("");
+        }
       } catch (error) {
         setError("Error al buscar productos: " + error.message);
       }
@@ -165,22 +193,24 @@ function Almacen() {
   const handleAgregarMaterial = async (event) => {
     event.preventDefault();
     try {
+      const materialData = {
+        nombreProducto: nombreProducto,
+        cantidad: parseInt(cantidad),
+        categoriaID: parseInt(categoriaSeleccionada),
+      };
       const response = await fetch("http://localhost:8080/api/productos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({
-          nombreProducto,
-          cantidad: parseInt(cantidad),
-          categoriaID: parseInt(categoriaSeleccionada),
-        }),
+        body: JSON.stringify(materialData),
       });
-
+      if (nombreProducto.trim() === "" || cantidad.trim() === "") {
+        throw new Error("Por favor complete todos los campos.");
+      }
       if (!response.ok) {
         throw new Error("Error al agregar material");
       }
-
       const data = await response.json();
       setMateriales((prevMateriales) => [...prevMateriales, data]);
       resetForm();
@@ -243,6 +273,13 @@ function Almacen() {
     setOpenModalEditar(true);
   };
 
+  const handleCloseModalEditar = async () => {
+    setOpenModalEditar(false);
+    setNombreProducto("");
+    setCantidad("");
+    setError(null);
+  };
+
   useEffect(() => {
     if (productoEditado) {
       setCategoriaSeleccionada(productoEditado.categoriaID.toString());
@@ -251,9 +288,88 @@ function Almacen() {
     }
   }, [productoEditado]);
 
+  const handleEntregarMaterial = async (event) => {
+    event.preventDefault();
+    try {
+      if (!maquinariaSeleccionada) {
+        throw new Error("Por favor selecciona una máquina.");
+      }
+      if (
+        !productoSeleccionado ||
+        !tipoMantenimientoSeleccionado ||
+        !cantidad ||
+        isNaN(Number(cantidad))
+      ) {
+        throw new Error("Por favor completa todos los campos correctamente.");
+      }
+      const tipoMantenimiento = parseInt(tipoMantenimientoSeleccionado);
+      if (isNaN(tipoMantenimiento)) {
+        throw new Error("El tipo de mantenimiento seleccionado no es válido.");
+      }
+      if (isNaN(horometro) || horometro < 0) {
+        throw new Error(
+          "El valor del horómetro debe ser un número válido y mayor o igual a 0."
+        );
+      }
+      if (cantidad > productoSeleccionado.stock) {
+        throw new Error("No hay suficiente stock del producto.");
+      }
+      const registroEntrega = {
+        maquinariaID: parseInt(maquinariaSeleccionada),
+        horometro_mantenimiento: horometro,
+        fecha_mantenimiento: new Date(),
+        productoID: parseInt(productoSeleccionado.productoID),
+        tipo_mantenimiento: tipoMantenimiento,
+        cantidad: parseInt(cantidad),
+      };
+      const response = await fetch("http://localhost:8080/api/mantenimientos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(registroEntrega),
+      });
+      if (response.ok) {
+        Swal.fire({
+          icon: "success",
+          title: "Entrega Exitosa",
+          text: "La entrega se ha realizado con éxito.",
+          confirmButtonColor: "#2F4A5B",
+        });
+        setError(null);
+        handlerCloseModalEntregar();
+        obtenerMateriales();
+      } else {
+        const errorMessage = await response.text();
+        Swal.fire({
+          icon: "error",
+          title: "Error al entregar material",
+          text:
+            errorMessage ||
+            "Ha ocurrido un error al intentar entregar el material.",
+          confirmButtonColor: "#2F4A5B",
+        });
+      }
+    } catch (error) {
+      console.error("Error al entregar material:", error);
+      setError(`Error al entregar material: ${error.message}`);
+    }
+  };
+
   const handleActualizarMaterial = async (event) => {
     event.preventDefault();
     try {
+      const categoriaSeleccionadaActualizar = categoriaSeleccionada;
+      if (
+        !categoriaSeleccionadaActualizar ||
+        categoriaSeleccionadaActualizar === ""
+      ) {
+        throw new Error("Por favor selecciona una categoría.");
+      }
+      const categoriaIDActualizar = parseInt(categoriaSeleccionadaActualizar);
+      if (isNaN(categoriaIDActualizar) || categoriaIDActualizar <= 0) {
+        throw new Error("La categoría seleccionada no es válida.");
+      }
       const response = await fetch(
         `http://localhost:8080/api/productos/${productoEditado.productoID}`,
         {
@@ -265,72 +381,44 @@ function Almacen() {
             productoID: productoEditado.productoID,
             nombreProducto: productoEditado.nombreProducto,
             cantidad: parseInt(productoEditado.cantidad),
-            categoriaID: parseInt(productoEditado.categoriaID),
+            categoriaID: categoriaIDActualizar,
             fecha: productoEditado.fecha,
           }),
         }
       );
-      if (!response.ok) {
-        throw new Error("Error al actualizar material");
+      if (response.ok) {
+        Swal.fire({
+          icon: "success",
+          title: "Actualización Exitosa",
+          text: "El material se ha actualizado correctamente.",
+          confirmButtonColor: "#2F4A5B",
+        });
+        setError(null);
+        setOpenModalEditar(false);
+        handleCloseModalEditar();
+        obtenerMateriales();
+      } else {
+        const errorMessage = await response.text();
+        throw new Error(errorMessage || "Error al actualizar material");
       }
-      setOpenModalEditar(false);
-      obtenerMateriales();
     } catch (error) {
+      console.error("Error al actualizar material:", error);
       setError(`Error al actualizar material: ${error.message}`);
-    }
-  };
-
-  const handleEntregarMaterial = async (event) => {
-    event.preventDefault();
-    try {
-      if (!productoSeleccionado) {
-        throw new Error("No se ha seleccionado un producto válido.");
-      }
-      if (!maquinariaSeleccionada) {
-        throw new Error("No se ha seleccionado una máquina válida.");
-      }
-      if (
-        !mantenimientos.some(
-          (mantenimiento) =>
-            mantenimiento.mantenimientoID === maquinariaSeleccionada
-        )
-      ) {
-        throw new Error(
-          "El mantenimiento seleccionado no está registrado en la base de datos."
-        );
-      }
-
-      const registroEntrega = {
-        productoID: productoSeleccionado.productoID,
-        mantenimientoID: parseInt(maquinariaSeleccionada), // Convertir a entero si es necesario
-        cantidad: parseFloat(cantidad),
-      };
-
-      const response = await fetch(
-        "http://localhost:8080/api/materiales_mantenimiento",
-        {
-          method: "POST",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(registroEntrega),
-        }
-      );
-
-      if (!response.ok) {
-        throw new Error("Error al entregar material");
-      }
-      handlerCloseModalEntregar();
-      obtenerMateriales();
-    } catch (error) {
-      setError(`Error al entregar material: ${error.message}`);
+      Swal.fire({
+        icon: "error",
+        title: "Error al actualizar material",
+        text:
+          error.message ||
+          "Ha ocurrido un error al intentar actualizar el material.",
+        confirmButtonColor: "#2F4A5B",
+      });
     }
   };
 
   return (
     <div className="h-screen flex flex-col">
-      <BarraSuperior>Almacen de materiales</BarraSuperior>
-      <div className="flex-1 bg-gray-100 p-6 flex justify-center  ">
+      <BarraSuperior>Almacén</BarraSuperior>
+      <div className="flex-1 bg-gray-100 p-6 ">
         {openModalEditar && (
           <div
             className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-40"
@@ -349,7 +437,7 @@ function Almacen() {
             onClick={handlerCloseModalEntregar}
           ></div>
         )}
-        {openModalEditar && productoEditado && (
+        {openModalEditar && productoEditado !== undefined && (
           <Modal
             handlerOpenModal={handlerOpenModalEditar}
             titulo={"Editar Material"}
@@ -385,11 +473,10 @@ function Almacen() {
                   className="px-4 py-2 border border-gray-300 rounded-md"
                   required
                 />
-
                 <label htmlFor="categoria">Categoría:</label>
                 <select
                   id="categoria"
-                  value={categoriaSeleccionada}
+                  value={categoriaSeleccionada} // <-- Aquí está el posible origen del error
                   onChange={handleCategoriaChange}
                   className="px-4 py-2 border border-gray-300 rounded-md"
                   required
@@ -432,32 +519,68 @@ function Almacen() {
                   className="px-4 py-2 border border-gray-300 rounded-md"
                   required
                 />
+
+                <label htmlFor="maquinaria">Máquina:</label>
                 <select
                   id="maquinaria"
                   value={maquinariaSeleccionada}
-                  onChange={(e) => {
-                    console.log("Valor seleccionado:", e.target.value); // Agregamos un console.log
-                    setMaquinariaSeleccionada(e.target.value);
-                  }}
+                  onChange={(e) => setMaquinariaSeleccionada(e.target.value)}
                   className="px-4 py-2 border border-gray-300 rounded-md"
                   required
                 >
                   <option value="" disabled>
                     -- Seleccione una máquina --
                   </option>
-                  {maquinas.map(
-                    (
-                      mantenimiento // Cambiamos maquina por mantenimiento
-                    ) => (
-                      <option
-                        key={mantenimiento.mantenimientoID}
-                        value={mantenimiento.mantenimientoID}
-                      >
-                        {`${mantenimiento.maquinariaID} - Horómetro: ${mantenimiento.horometroPromedio}`}
-                      </option>
-                    )
-                  )}
+                  {maquinas.map((maquina) => (
+                    <option
+                      key={maquina.maquinariaID}
+                      value={maquina.maquinariaID}
+                    >
+                      {`${maquina.modelo} - ID: ${maquina.maquinariaID}`}
+                    </option>
+                  ))}
                 </select>
+                <label htmlFor="tipoMantenimiento">
+                  Tipo de Mantenimiento:
+                </label>
+                <select
+                  id="tipoMantenimiento"
+                  value={tipoMantenimientoSeleccionado}
+                  onChange={(e) =>
+                    setTipoMantenimientoSeleccionado(e.target.value)
+                  }
+                  className="px-4 py-2 border border-gray-300 rounded-md"
+                  required
+                >
+                  <option value="" disabled>
+                    -- Seleccione un tipo de mantenimiento --
+                  </option>
+                  {tipoMantenimiento.map((tipo) => (
+                    <option
+                      key={tipo.tipoMantenimientoID}
+                      value={tipo.tipoMantenimientoID}
+                    >
+                      {tipo.nombre}
+                    </option>
+                  ))}
+                </select>
+
+                <label htmlFor="horometro">Horómetro:</label>
+                <input
+                  type="number"
+                  id="horometro"
+                  value={horometro}
+                  onChange={(e) => {
+                    const value = parseFloat(e.target.value);
+                    if (!isNaN(value) && value >= 0) {
+                      setHorometro(value);
+                    } else {
+                      setHorometro("");
+                    }
+                  }}
+                  className="px-4 py-2 border border-gray-300 rounded-md"
+                  required
+                />
               </div>
               <button
                 type="submit"
@@ -469,82 +592,90 @@ function Almacen() {
           </Modal>
         )}
         {openModalAgregar && (
-          <Modal
-            handlerOpenModal={handlerOpenModalAgregar}
-            titulo={"Agregar Material"}
-          >
-            <form onSubmit={handleAgregarMaterial}>
-              <div className="flex flex-col gap-4 ">
-                <label htmlFor="nombreProducto">Nombre del Producto:</label>
+          <div className="flex justify-center">
+            <Modal
+              handlerOpenModal={handlerOpenModalAgregar}
+              titulo={"Agregar Material"}
+            >
+              <form onSubmit={handleAgregarMaterial}>
+                <div className="flex flex-col gap-4">
+                  <label htmlFor="nombreProducto">Nombre del Producto:</label>
+                  <input
+                    type="text"
+                    id="nombreProducto"
+                    value={nombreProducto}
+                    onChange={(e) => setNombreProducto(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-md"
+                    required
+                  />
+
+                  <label htmlFor="cantidad">Cantidad:</label>
+                  <input
+                    type="number"
+                    id="cantidad"
+                    value={cantidad}
+                    onChange={(e) => setCantidad(e.target.value)}
+                    className="px-4 py-2 border border-gray-300 rounded-md"
+                    required
+                  />
+
+                  <label htmlFor="categoria">Categoría:</label>
+                  <select
+                    id="categoria"
+                    value={categoriaSeleccionada}
+                    onChange={handleCategoriaChange}
+                    className="px-4 py-2 border border-gray-300 rounded-md"
+                    required
+                  >
+                    <option value="" disabled>
+                      -- Seleccione una categoría --
+                    </option>
+                    {categorias.map((categoria) => (
+                      <option
+                        key={categoria.categoriaID}
+                        value={categoria.categoriaID}
+                      >
+                        {categoria.nombre}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md w-[100%] mt-4"
+                >
+                  Agregar Producto
+                </button>
+              </form>
+            </Modal>
+          </div>
+        )}
+        <div className="max-w-full mx-auto">
+          <div className="flex flex-1 justify-between">
+            <div className="flex flex-1 gap-4">
+              <form onSubmit={handleSubmit} className="mb-4" autoComplete="off">
                 <input
                   type="text"
-                  id="nombreProducto"
-                  value={nombreProducto}
-                  onChange={(e) => setNombreProducto(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-md"
-                  required
+                  value={busqueda}
+                  onChange={handleBusquedaChange}
+                  placeholder="Buscar material..."
+                  className="px-4 py-2 border border-gray-300 rounded-md mr-2"
+                  required={true}
                 />
-
-                <label htmlFor="cantidad">Cantidad:</label>
-                <input
-                  type="number"
-                  id="cantidad"
-                  value={cantidad}
-                  onChange={(e) => setCantidad(e.target.value)}
-                  className="px-4 py-2 border border-gray-300 rounded-md"
-                  required
-                />
-
-                <label htmlFor="categoria">Categoría:</label>
-                <select
-                  id="categoria"
-                  value={categoriaSeleccionada}
-                  onChange={handleCategoriaChange}
-                  className="px-4 py-2 border border-gray-300 rounded-md"
-                  required
+                <button
+                  type="submit"
+                  className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md h-10"
                 >
-                  <option value="" disabled>
-                    -- Seleccione una categoría --
-                  </option>
-                  {categorias.map((categoria) => (
-                    <option
-                      key={categoria.categoriaID}
-                      value={categoria.categoriaID}
-                    >
-                      {categoria.nombre}
-                    </option>
-                  ))}
-                </select>
-              </div>
+                  Buscar
+                </button>
+              </form>
               <button
-                type="submit"
-                className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md w-[100%] mt-4"
+                className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md h-10 "
+                onClick={obtenerMateriales}
               >
-                Agregar Producto
+                Listar
               </button>
-            </form>
-          </Modal>
-        )}
-
-        <div className="min-h-screen flex-1 mx-auto ">
-          <div className="flex flex-1 justify-between">
-            <form onSubmit={handleSubmit} className="mb-4" autoComplete="off">
-              <input
-                type="text"
-                value={busqueda}
-                onChange={handleBusquedaChange}
-                placeholder="Buscar material..."
-                className="px-4 py-2 border border-gray-300 rounded-md mr-2"
-                required={true}
-              />
-              <button
-                type="submit"
-                className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md h-10"
-              >
-                Buscar
-              </button>
-            </form>
-
+            </div>
             <button
               className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md h-10 "
               onClick={handlerOpenModalAgregar}
@@ -557,12 +688,18 @@ function Almacen() {
             <table className="w-[100%] border-collapse border border-gray-300 mb-4">
               <thead>
                 <tr>
-                  <th className="border border-gray-300 px-4 py-2">Nombre</th>
-                  <th className="border border-gray-300 px-4 py-2">
+                  <th className="border border-gray-300 bg-[#2F4A5B] text-white px-4 py-2">
+                    Nombre
+                  </th>
+                  <th className="border border-gray-300 bg-[#2F4A5B] text-white px-4 py-2">
                     Categoria
                   </th>
-                  <th className="border border-gray-300 px-4 py-2">Cantidad</th>
-                  <th className="border border-gray-300 px-4 py-2">Acciones</th>
+                  <th className="border border-gray-300 bg-[#2F4A5B] text-white px-4 py-2">
+                    Cantidad
+                  </th>
+                  <th className="border border-gray-300 bg-[#2F4A5B] text-white px-4 py-2">
+                    Acciones
+                  </th>
                 </tr>
               </thead>
               <tbody>
@@ -578,7 +715,6 @@ function Almacen() {
                       {material.cantidad}
                     </td>
                     <td className="border border-gray-300 px-4 py-2 ">
-                      {/* Botón de eliminar */}
                       <div className="flex flex-1 justify-around  items-center">
                         <button
                           onClick={() =>
@@ -591,14 +727,12 @@ function Almacen() {
                         >
                           <FaTrash style={{ verticalAlign: "middle" }} />
                         </button>
-                        {/* Botón de editar */}
                         <button
                           onClick={() => abrirModalEdicion(material)}
                           className="flex items-center px-3 py-1 bg-blue-500 text-white rounded-md"
                         >
                           <FaEdit style={{ verticalAlign: "middle" }} />
                         </button>
-                        {/* Botón de entregar */}
                         <button
                           onClick={() => handlerOpenModalEntregar(material)}
                           className="flex items-center px-3 py-1 bg-green-500 text-white rounded-md ml-2"
@@ -616,6 +750,6 @@ function Almacen() {
       </div>
     </div>
   );
-}
+};
 
 export default Almacen;

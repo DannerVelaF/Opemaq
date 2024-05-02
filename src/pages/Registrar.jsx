@@ -1,6 +1,7 @@
 import React, { useContext, useEffect, useState } from "react";
 import BarraSuperior from "../components/BarraSuperior";
 import { MaquinaContext } from "../App";
+import axios from "axios";
 const useField = ({ placeholder, name, autoComplete = "off", required }) => {
   const [value, setValue] = useState("");
 
@@ -26,6 +27,16 @@ function Registrar() {
   const [maquinaSeleccionada, setMaquinaSeleccionada] =
     useContext(MaquinaContext);
 
+  useEffect(() => {
+    if (maquinaSeleccionada) {
+      setFormData((prevData) => ({
+        ...prevData,
+        maquinariaID: maquinaSeleccionada.maquinariaID, // Utiliza directamente maquinaSeleccionada.maquinariaID
+        usuarioID: localStorage.getItem("usuarioID"),
+      }));
+    }
+  }, [maquinaSeleccionada]);
+
   const validar = () => {
     const campos = [
       "ruc",
@@ -35,9 +46,10 @@ function Registrar() {
       "correo_empresa",
       "telefono_empresa",
       "dirección_empresa",
-      "horas_uso",
+      "horas_contratadas",
       "precio_hora",
       "descripcion",
+      "maquinariaID",
     ];
     const vacios = campos.filter((campo) => !formData[campos]);
     return vacios.length === 0;
@@ -45,14 +57,52 @@ function Registrar() {
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setFormData((prevData) => ({
-      ...prevData,
-      tipo_maquina: maquinaSeleccionada?.tipo_maquina || "",
-      marca_maquina: maquinaSeleccionada?.marca_maquina || "",
-      modelo_maquina: maquinaSeleccionada?.modelo_maquina || "",
-    }));
-    if (!validar()) {
-      console.log(formData);
+    if (!maquinaSeleccionada) {
+      console.log("primero debe selecconar una maquina");
+    } else {
+      if (!validar()) {
+        console.log(formData);
+      }
+    }
+
+    const {
+      clienteID,
+      nombre_empresa,
+      correo_empresa,
+      dirección_empresa,
+      telefono_empresa,
+    } = formData;
+
+    const formCliente = {
+      clienteID: clienteID,
+      nombre: nombre_empresa,
+      direccion: dirección_empresa,
+      correo: correo_empresa,
+      telefono: telefono_empresa,
+    };
+
+    // console.log(formCliente);
+    registrarCliente(formCliente);
+    // regist
+  };
+
+  const registrarCliente = async (data) => {
+    try {
+      const endpoint = "http://localhost:8080/api/clientes";
+      const response = await axios.post(endpoint, data);
+      registrarContrato(formData);
+    } catch (error) {
+      throw new Error();
+    }
+  };
+
+  const registrarContrato = async (data) => {
+    console.log(formData);
+    try {
+      const endpoint = "http://localhost:8080/api/contratos";
+      const response = await axios.post(endpoint, data);
+    } catch (error) {
+      console.log(error);
     }
   };
 
@@ -68,7 +118,7 @@ function Registrar() {
 
   const ruc = useField({
     placeholder: "Ingrese el RUC de la empresa",
-    name: "ruc",
+    name: "clienteID",
     required: true,
   });
 
@@ -111,7 +161,7 @@ function Registrar() {
 
   const precio_hora = useField({
     required: true,
-    name: "precio_hora",
+    name: "horas_contratadas",
     placeholder: "s/",
   });
 
@@ -195,7 +245,10 @@ function Registrar() {
                     {...fecha_inicio}
                     onChange={(e) => {
                       fecha_inicio.onChange(e);
-                      handleInputChange(fecha_inicio.name, e.target.value);
+                      handleInputChange(
+                        fecha_inicio.name,
+                        new Date(e.target.value).toISOString()
+                      );
                     }}
                   />
                 </div>
@@ -207,7 +260,10 @@ function Registrar() {
                     {...fecha_fin}
                     onChange={(e) => {
                       fecha_fin.onChange(e);
-                      handleInputChange(fecha_fin.name, e.target.value);
+                      handleInputChange(
+                        fecha_fin.name,
+                        new Date(e.target.value).toISOString()
+                      );
                     }}
                   />
                 </div>

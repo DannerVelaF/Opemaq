@@ -28,6 +28,8 @@ const FormSide = () => {
       const data = { nombre: user, password: password };
       const headers = { "Content-Type": "application/json" };
       const response = await axios.post(endpoint, data, { headers });
+      console.log(response.data.usuarioID);
+      localStorage.setItem("usuarioID", response.data.usuarioID);
       if (response.status === 200 || response.status === 202) {
         navigate("/inicio/registrar");
       } else if (response.status === 404) {

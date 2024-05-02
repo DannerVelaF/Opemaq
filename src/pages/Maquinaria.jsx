@@ -4,6 +4,8 @@ import MaquinaIMG from "../assets/maquinaria.jpg";
 import Modal from "../components/Modal";
 import { MaquinaContext } from "../App";
 import { useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
+
 function Maquinaria() {
   const [error, setError] = useState("");
   const [openModal, setOpenModal] = useState(false);
@@ -59,34 +61,48 @@ function Maquinaria() {
         },
         body: JSON.stringify(formValues),
       });
-      const responseText = await response.text();
-      console.log("Respuesta del servidor:", responseText);
-      if (!response.ok) {
-        try {
-          const errorData = await response.json();
-          console.error("Error en la solicitud:", errorData);
-        } catch (error) {
-          console.error("Error al analizar la respuesta JSON:", error);
-        }
-        // throw new Error("Error al registrar maquina");
-        return;
+      if (response.ok) {
+        Swal.fire({
+          icon: "success",
+          title: "Registro exitoso",
+          text: "Se registro el nuevo equipo.",
+          confirmButtonColor: "#2F4A5B",
+        });
+
+        setFormValues({});
+        ObtenerMaquinas();
+        handlerOpenModal();
+      } else {
+        Swal.fire({
+          icon: "error",
+          title: "Error al registrar la máquina",
+          text: "Ha ocurrido un error al registrar el nuevo equipo",
+          confirmButtonColor: "#2F4A5B",
+        });
       }
     } catch (error) {
-      console.log(error);
+      console.log("Error al registrar el nuevo equipo:", error);
+      Swal.fire({
+        icon: "error",
+        title: "Error al registrar la máquina",
+        text: "Ha ocurrido un error al registrar el nuevo equipo",
+        confirmButtonColor: "#2F4A5B",
+      });
     }
 
     setFormValues({});
+    ObtenerMaquinas();
     handlerOpenModal();
   };
 
   const vin = {
     type: "text",
-    name: "maquinaID",
+    name: "maquinariaID",
     placeholder: "Identificador de la maquina",
     autoComplete: "off",
     require: "true",
     onChange: handleChange,
-    value: formValues.maquinaID || "",
+    value: formValues.maquinariaID || "",
   };
 
   const modelo_maquina = {
@@ -310,7 +326,7 @@ function Maquinaria() {
           </Modal>
         )}
 
-        <div className="w-[1443px] max-h-[780px] bg-[#FAFAFA]  ">
+        <div className="w-full h-full bg-[#FAFAFA]  ">
           <div className="flex justify-between bg-[#F1F5F9] py-4 px-10">
             <button
               className="bg-[#2F4A5B] px-8 py-2 text-white rounded-xl"
@@ -328,7 +344,7 @@ function Maquinaria() {
             </div>
           </div>
           {/* interfaz de muestra */}
-          <div className="p-7 flex flex-col gap-7 flex-1 min-h-[700px] overflow-y-scroll">
+          <div className="p-7 flex flex-col gap-7 flex-1 max-h-[750px] overflow-y-scroll">
             {maquinas.map((maquina) => (
               <div
                 key={maquina.maquinaID}
@@ -339,35 +355,53 @@ function Maquinaria() {
                     src={`/public/image/${maquina.imagenMaquinaria}`}
                     width={250}
                     alt=""
-                    className=""
+                    className="shadow-md"
                   />
-                  <div className="font-medium text-xl">
+                  <div className="font-medium text-lg">
+                    <p>Vin: {maquina.maquinariaID}</p>
                     <p>Tipo: {maquina.tipoMaquinaria}</p>
                     <p>Marca: {maquina.marca}</p>
+                    <p>Marca: {maquina.marca}</p>
                     <p>Modelo: {maquina.modelo}</p>
-                    <p>Operador: {maquina.trabajador}</p>
+                    <p>
+                      Operador:{" "}
+                      {`${maquina.trabajador} ${maquina.apellidoTrabajador}`}
+                    </p>
                   </div>
                 </div>
                 <hr className="border-2 rotate-90 w-44" />
-                <div className="flex-1 flex items-center flex-col justify-center">
-                  <p className="text-xl relative px-4 flex text-green-500 font-bold">
-                    <span className="absolute rounded-full w-3 h-3 bg-green-500 top-0 left-0 translate-y-[50%]"></span>
-                    Estado: Disponible
-                  </p>
-                  <div className="font-medium text-xl text-white">
-                    <button
-                      className="py-2 px-8 bg-[#2F4A5B] mt-1"
-                      onClick={() =>
-                        handleAlquilar({
-                          tipo_maquina: maquina.tipoMaquinaria,
-                          marca_maquina: maquina.marca,
-                          modelo_maquina: maquina.modelo,
-                        })
-                      }
-                    >
-                      Alquilar
-                    </button>
-                  </div>
+                <div
+                  className="flex-1 flex items-center flex-col justify-center"
+                  style={{ width: "20%" }}
+                >
+                  {!maquina.estado ? (
+                    <p className="text-xl relative px-4 flex text-red-500 font-bold">
+                      <span className="absolute rounded-full w-3 h-3 bg-red-500 top-0 left-0 translate-y-[50%]"></span>
+                      <span className="ml-2">Alquilada o en mantenimiento</span>
+                    </p>
+                  ) : (
+                    <p className="text-xl relative px-4 flex text-green-500 font-bold">
+                      <span className="absolute rounded-full w-3 h-3 bg-green-500 top-0 left-0 translate-y-[50%]"></span>
+                      <span className="ml-2">Disponible</span>
+                    </p>
+                  )}
+                  {maquina.estado && (
+                    <div className="font-medium text-xl text-white">
+                      <button
+                        className="py-2 px-8 bg-[#2F4A5B] mt-1 rounded-md text-white shadow-md hover:bg-opacity-80 transition duration-300"
+                        onClick={() =>
+                          handleAlquilar({
+                            maquinariaID: maquina.maquinariaID,
+                            tipo_maquina: maquina.tipoMaquinaria,
+                            marca_maquina: maquina.marca,
+                            modelo_maquina: maquina.modelo,
+                          })
+                        }
+                      >
+                        Alquilar
+                      </button>
+                    </div>
+                  )}
                 </div>
               </div>
             ))}
