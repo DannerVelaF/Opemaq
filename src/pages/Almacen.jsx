@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import BarraSuperior from "../components/BarraSuperior";
 import Modal from "../components/Modal";
 import Swal from "sweetalert2";
-import { FaTrash, FaEdit, FaTruck } from 'react-icons/fa';
+import { FaTrash, FaEdit, FaTruck, FaSearch, FaPlus } from 'react-icons/fa';
 
 
 const Almacen = () => {
@@ -33,13 +33,36 @@ const Almacen = () => {
     obtenerTiposMantenimiento();
     obtenerMaquinas();
   }, []);
+const obtenerToken = () => {
+  const token = localStorage.getItem("token");
+  if (!token) {
+    Swal.fire({
+      icon: 'warning',
+      title: 'No se ha iniciado sesión',
+      text: 'Debes iniciar sesión para acceder a esta página',
+      confirmButtonColor: '#2F4A5B',
+      time: 2000,
+    }).then(() => {
+      window.location.href = "/login";
+    });
+  }
+  return token;
+};
+  
 
   const obtenerMateriales = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/productos");
+      const token = obtenerToken();
+      const response = await fetch("http://localhost:8080/api/productos", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
       if (!response.ok) {
         throw new Error("Error al obtener los datos de la API");
       }
+  
       const data = await response.json();
       setMateriales(data);
     } catch (error) {
@@ -49,10 +72,18 @@ const Almacen = () => {
 
   const obtenerCategorias = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/categoria_producto");
+      const token = obtenerToken();
+
+      const response = await fetch("http://localhost:8080/api/categoria_producto", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
       if (!response.ok) {
         throw new Error("Error al obtener las categorías de la API");
       }
+  
       const data = await response.json();
       setCategorias(data);
       if (data.length > 0) {
@@ -62,13 +93,21 @@ const Almacen = () => {
       setError("Error al obtener las categorías de la API: " + error.message);
     }
   };
-
+  
   const obtenerMantenimientos = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/mantenimientos");
+      const token = obtenerToken();
+  
+      const response = await fetch("http://localhost:8080/api/mantenimientos", {
+        headers: {
+          Authorization: `Bearer ${token}`, 
+        },
+      });
+  
       if (!response.ok) {
         throw new Error("Error al obtener los datos de los mantenimientos");
       }
+  
       const data = await response.json();
       const maquinasConHorometro = data.map(mantenimiento => ({
         maquinariaID: mantenimiento.maquinariaID,
@@ -89,13 +128,22 @@ const Almacen = () => {
       setError("Error al obtener los datos de los mantenimientos: " + error.message);
     }
   };
+  
 
   const obtenerMaquinas = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/maquinas");
+      const token = obtenerToken();
+
+      const response = await fetch("http://localhost:8080/api/maquinas", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+
       if (!response.ok) {
         throw new Error("Error al obtener las máquinas");
       }
+
       const data = await response.json();
       setMaquinas(data);
     } catch (error) {
@@ -105,16 +153,25 @@ const Almacen = () => {
 
   const obtenerTiposMantenimiento = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/tipo_mantenimiento");
+      const token = obtenerToken();
+  
+      const response = await fetch("http://localhost:8080/api/tipo_mantenimiento", {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      });
+  
       if (!response.ok) {
         throw new Error("Error al obtener los tipos de mantenimiento");
       }
+  
       const data = await response.json();
       setTipoMantenimiento(data);
     } catch (error) {
       setError("Error al obtener los tipos de mantenimiento: " + error.message);
     }
   };
+  
   
   const handlerOpenModalAgregar = () => {
     setOpenModalAgregar(!openModalAgregar);
@@ -151,14 +208,20 @@ const Almacen = () => {
     event.preventDefault();
     if (busqueda.trim() !== "") {
       try {
-        const response = await fetch(`http://localhost:8080/api/productos/buscar?nombre=${busqueda}`);
+        const token = obtenerToken();
+
+        const response = await fetch(`http://localhost:8080/api/productos/buscar?nombre=${busqueda}`, {
+          headers: {
+            "Authorization": `Bearer ${token}`, // Agregar el token JWT en la cabecera Authorization
+          },
+        });
         if (!response.ok) {
           throw new Error("Error al buscar productos");
         }
         const data = await response.json();
-        if(data.length === 0) {
+        if (data.length === 0) {
           setError("No se encontraron productos con el término de búsqueda ingresado.");
-        }else{
+        } else {
           setMateriales(data);
           setError(null);
           setBusqueda("");
@@ -169,11 +232,18 @@ const Almacen = () => {
     } else {
       setError("Por favor ingrese un término de búsqueda");
     }
-  };
+};
+
 
   const handleAgregarMaterial = async (event) => {
     event.preventDefault();
     try {
+        const token = obtenerToken();
+
+        if (nombreProducto.trim() === "" || cantidad.trim() === "" || isNaN(parseInt(cantidad)) || parseInt(cantidad) <= 0 || isNaN(parseInt(categoriaSeleccionada)) || parseInt(categoriaSeleccionada) <= 0) {
+            throw new Error("Por favor complete todos los campos correctamente.");
+        }
+
         const materialData = {
             "nombreProducto": nombreProducto,
             "cantidad": parseInt(cantidad),
@@ -183,12 +253,10 @@ const Almacen = () => {
             method: "POST",
             headers: {
                 "Content-Type": "application/json",
+                "Authorization": `Bearer ${token}`,
             },
             body: JSON.stringify(materialData),
         });
-        if (nombreProducto.trim() === "" || cantidad.trim() === "") {
-            throw new Error("Por favor complete todos los campos.");
-        }
         if (!response.ok) {
             throw new Error("Error al agregar material");
         }
@@ -196,13 +264,17 @@ const Almacen = () => {
         setMateriales((prevMateriales) => [...prevMateriales, data]);
         resetForm();
         obtenerMateriales();
+        Swal.fire({
+            title: "Material agregado",
+            text: "El material se ha agregado correctamente.",
+            icon: "success",
+            confirmButtonColor: "#2F4A5B",
+        });
     } catch (error) {
         setError(`Error al agregar material: ${error.message}`);
     }
-  };
+};
 
-
-  
   const resetForm = () => {
     setOpenModalAgregar(false);
     setNombreProducto("");
@@ -222,8 +294,13 @@ const Almacen = () => {
     }).then(async (result) => {
       if (result.isConfirmed) {
         try {
+          const token = obtenerToken();
+  
           const response = await fetch(`http://localhost:8080/api/productos/${productoID}`, {
             method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${token}`,
+            },
           });
           if (!response.ok) {
             throw new Error("Error al eliminar material");
@@ -236,6 +313,7 @@ const Almacen = () => {
       }
     });
   };
+  
 
   const abrirModalEdicion = (producto) => {
     setProductoEditado(producto);
@@ -285,10 +363,14 @@ const Almacen = () => {
         tipo_mantenimiento: tipoMantenimiento,
         cantidad: parseInt(cantidad),
       };
+  
+      const token = obtenerToken();
+  
       const response = await fetch("http://localhost:8080/api/mantenimientos", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
         },
         body: JSON.stringify(registroEntrega),
       });
@@ -317,6 +399,7 @@ const Almacen = () => {
     }
   };
   
+  
   const handleActualizarMaterial = async (event) => {
     event.preventDefault();
     try {
@@ -328,10 +411,14 @@ const Almacen = () => {
       if (isNaN(categoriaIDActualizar) || categoriaIDActualizar <= 0) {
         throw new Error("La categoría seleccionada no es válida.");
       }
+  
+      const token = obtenerToken();
+  
       const response = await fetch(`http://localhost:8080/api/productos/${productoEditado.productoID}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`, // Agregar el token JWT en la cabecera Authorization
         },
         body: JSON.stringify({
           productoID: productoEditado.productoID,
@@ -368,9 +455,10 @@ const Almacen = () => {
     }
   };
   
+  
   return (
     <div className="h-screen flex flex-col">
-      <BarraSuperior>Almacén</BarraSuperior>
+      <BarraSuperior>Inventario de almacén</BarraSuperior>
       <div className="flex-1 bg-gray-100 p-6">
         {openModalEditar && (
           <div className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-40" onClick={handlerOpenModalEditar}></div>
@@ -536,21 +624,19 @@ const Almacen = () => {
 
                 <label htmlFor="categoria">Categoría:</label>
                 <select
-  id="categoria"
-  value={categoriaSeleccionada}
-  onChange={handleCategoriaChange}
-  className="px-4 py-2 border border-gray-300 rounded-md"
-  required
->
-  <option value="" disabled>-- Seleccione una categoría --</option>
-  {categorias.map((categoria) => (
-    <option key={categoria.categoriaID} value={categoria.categoriaID}>
-      {categoria.nombre}
-    </option>
-  ))}
-</select>
-
-
+                  id="categoria"
+                  value={categoriaSeleccionada}
+                  onChange={handleCategoriaChange}
+                  className="px-4 py-2 border border-gray-300 rounded-md"
+                  required
+                >
+                  <option value="" disabled>-- Seleccione una categoría --</option>
+                  {categorias.map((categoria) => (
+                    <option key={categoria.categoriaID} value={categoria.categoriaID}>
+                      {categoria.nombre}
+                    </option>
+                  ))}
+                </select>
               </div>
               <button
                 type="submit"
@@ -561,22 +647,25 @@ const Almacen = () => {
             </form>
           </Modal>
         )}
-        <div className="max-w-4xl mx-auto">
+        <div className="w-full mx-auto">
           
           <div className="flex flex-1 justify-between">
             <div className="flex flex-1 gap-4">
-              <form onSubmit={handleSubmit} className="mb-4" autoComplete="off">
+              <form onSubmit={handleSubmit} className="mb-4 flex" autoComplete="off" >
                 <input
                   type="text"
                   value={busqueda}
                   onChange={handleBusquedaChange}
                   placeholder="Buscar material..."
-                  className="px-4 py-2 border border-gray-300 rounded-md mr-2"
-                  required={true}
-                />
-                <button type="submit" className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md h-10">
-                  Buscar
-                </button>
+                  className="px-4 py-2 border border-gray-300 rounded-l-md focus:outline-none"
+                    required={true}
+                    />
+                    <button
+                        type="submit"
+                        className="px-4 py-2 bg-[#2F4A5B] text-white rounded-r-md"
+                    >
+                        <FaSearch />
+                    </button>
               </form>
               <button 
               className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md h-10 "
@@ -586,9 +675,10 @@ const Almacen = () => {
               </button>
             </div>
             <button
-              className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md h-10 "
+              className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md flex items-center h-10"
               onClick={handlerOpenModalAgregar}
             >
+              <FaPlus className="mr-2" />
               Agregar Material
             </button>
           </div>
@@ -611,13 +701,13 @@ const Almacen = () => {
                     <td className="border border-gray-300 px-4 py-2">{material.cantidad}</td>
                     <td className="border border-gray-300 px-4 py-2 ">
                       <div className="flex flex-1 justify-around  items-center">
-                        <button onClick={() => eliminarMaterial(material.productoID, material.nombreProducto)} className="flex items-center px-3 py-1 bg-red-500 text-white rounded-md mr-2">
+                        <button onClick={() => eliminarMaterial(material.productoID, material.nombreProducto)} className="flex items-center px-3 py-1 bg-red-500 text-white rounded-md mr-2 hover:bg-white hover:text-red-500">
                           <FaTrash style={{ verticalAlign: 'middle' }} />
                         </button>
-                        <button onClick={() => abrirModalEdicion(material)} className="flex items-center px-3 py-1 bg-blue-500 text-white rounded-md">
+                        <button onClick={() => abrirModalEdicion(material)} className="flex items-center px-3 py-1 bg-blue-500 text-white rounded-md hover:bg-white hover:text-blue-700">
                           <FaEdit style={{ verticalAlign: 'middle' }} />
                         </button>
-                        <button onClick={() => handlerOpenModalEntregar(material)} className="flex items-center px-3 py-1 bg-green-500 text-white rounded-md ml-2">
+                        <button onClick={() => handlerOpenModalEntregar(material)} className="flex items-center px-3 py-1 bg-green-500 text-white rounded-md ml-2 hover:bg-white hover:text-green-900">
                           <FaTruck style={{ verticalAlign: 'middle' }} />
                         </button>
                       </div>

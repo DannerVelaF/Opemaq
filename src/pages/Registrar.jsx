@@ -1,15 +1,21 @@
-import React, { useContext, useEffect, useState } from "react";
+import React, { useContext, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import BarraSuperior from "../components/BarraSuperior";
 import { MaquinaContext } from "../App";
+import Swal from "sweetalert2";
+import { useHref } from "react-router-dom";
+
 const useField = ({ placeholder, name, autoComplete = "off", required }) => {
   const [value, setValue] = useState("");
 
   const onChange = (event) => {
     setValue(event.target.value);
   };
-  const resetvalue = () => {
+
+  const resetValue = () => {
     setValue("");
   };
+
   return {
     placeholder,
     name,
@@ -17,43 +23,96 @@ const useField = ({ placeholder, name, autoComplete = "off", required }) => {
     onChange,
     autoComplete,
     required,
-    resetvalue,
+    resetValue,
   };
 };
 
 function Registrar() {
-  const [formData, setFormData] = useState({}); // Estado para almacenar los datos del formulario
-  const [maquinaSeleccionada, setMaquinaSeleccionada] =
-    useContext(MaquinaContext);
+  const [formData, setFormData] = useState({});
+  const [maquinaSeleccionada] = useContext(MaquinaContext);
+  const [horasContratadas, setHorasContratadas] = useState("");
+  const [precioPorHora, setPrecioPorHora] = useState("");
+  const [montoTotal, setMontoTotal] = useState("");
+  const navigate = useNavigate();
 
-  const validar = () => {
-    const campos = [
-      "ruc",
-      "nombre_empresa",
-      "fecha_inicio",
-      "fecha_fin",
-      "correo_empresa",
-      "telefono_empresa",
-      "dirección_empresa",
-      "horas_uso",
-      "precio_hora",
-      "descripcion",
-    ];
-    const vacios = campos.filter((campo) => !formData[campos]);
-    return vacios.length === 0;
+  const obtenerToken = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      Swal.fire({
+        icon: "warning",
+        title: "No se ha iniciado sesión",
+        text: "Debes iniciar sesión para acceder a esta página",
+        confirmButtonColor: "#2F4A5B",
+      }).then(() => {
+        window.location.href = "/login";
+      });
+    }
+    return token;
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
-    setFormData((prevData) => ({
-      ...prevData,
-      tipo_maquina: maquinaSeleccionada?.tipo_maquina || "",
-      marca_maquina: maquinaSeleccionada?.marca_maquina || "",
-      modelo_maquina: maquinaSeleccionada?.modelo_maquina || "",
-    }));
-    if (!validar()) {
-      console.log(formData);
+
+    if (!formData.ruc || !formData.nombreCliente || !formData.correoCliente || !formData.telefonoCliente || !formData.direccionCliente || !formData.fecha_inicio || !formData.fecha_fin || !formData.descripcion || !maquinaSeleccionada || !horasContratadas || !precioPorHora) {
+      Swal.fire({
+        icon: "error",
+        title: "Campos incompletos",
+        text: "Por favor, complete todos los campos antes de enviar el formulario.",
+        confirmButtonColor: "#2F4A5B",
+      });
+      return;
     }
+
+    const dataToSend = {
+      clienteID: formData.ruc,
+      nombreCliente: formData.nombreCliente,
+      correoCliente: formData.correoCliente,
+      telefonoCliente: formData.telefonoCliente,
+      direccionCliente: formData.direccionCliente,
+      fecha_inicio: formData.fecha_inicio + "T00:00:00",
+      fecha_fin: formData.fecha_fin + "T00:00:00",
+      descripcion: formData.descripcion,
+      maquinariaID: maquinaSeleccionada.maquinaID,
+      usuarioID: 1,
+      horas_contratadas: parseFloat(horasContratadas) || "",
+      precio_hora: parseFloat(precioPorHora) || "",
+    };
+
+    try {
+      const token = obtenerToken();
+      const response = await fetch("http://localhost:8080/api/contratos", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+        body: JSON.stringify(dataToSend),
+      });
+      console.log(dataToSend);
+      if (!response.ok) {
+        throw new Error("Error al enviar los datos");
+      }
+
+      Swal.fire({
+        icon: "success",
+        title: "Se realizo el contrato exitosamente",
+        confirmButtonColor: "#2F4A5B",
+      }).then(() => {
+        navigate("/inicio"); 
+      });
+  
+      resetForm();
+    } catch (error) {
+      console.error("Error:", error.message);
+      alert("Error al enviar los datos");
+    }
+  };
+
+  const resetForm = () => {
+    setFormData({});
+    setHorasContratadas("");
+    setPrecioPorHora("");
+    setMontoTotal("");
   };
 
   const handleInputChange = (field, value) => {
@@ -63,9 +122,6 @@ function Registrar() {
     }));
   };
 
-  const inputStlye = "h-10 w-[100%] border-2 ps-[17px] mt-1 border-[#2F4A5B] transition-all duration-300 focus:border-blue-500 focus:outline-none";
-  const shortInput = "h-10 w-[80%] border-2 ps-[17px] mt-2 border-[#2F4A5B] transition-all duration-300 focus:border-blue-500 focus:outline-none";
-
   const ruc = useField({
     placeholder: "Ingrese el RUC de la empresa",
     name: "ruc",
@@ -74,13 +130,15 @@ function Registrar() {
 
   const empresa = useField({
     placeholder: "Ingrese el nombre de la empresa",
-    name: "nombre_empresa",
+    name: "nombreCliente",
     required: true,
   });
+
   const fecha_inicio = useField({
     name: "fecha_inicio",
     required: true,
   });
+
   const fecha_fin = useField({
     name: "fecha_fin",
     required: true,
@@ -88,31 +146,20 @@ function Registrar() {
 
   const correo_empresa = useField({
     placeholder: "Ingresa el correo de la empresa",
-    name: "correo_empresa",
+    name: "correoCliente",
     required: true,
   });
 
   const telefono_empresa = useField({
     placeholder: "Ingresa el teléfono de la empresa",
-    name: "telefono_empresa",
+    name: "telefonoCliente",
     required: true,
   });
 
   const direccion_empresa = useField({
     placeholder: "Ingresa la dirección de la empresa",
-    name: "dirección_empresa",
+    name: "direccionCliente",
     required: true,
-  });
-
-  const horas_uso = useField({
-    required: true,
-    name: "horas_uso",
-  });
-
-  const precio_hora = useField({
-    required: true,
-    name: "precio_hora",
-    placeholder: "s/",
   });
 
   const descripcion = useField({
@@ -120,45 +167,22 @@ function Registrar() {
     name: "descripcion",
   });
 
-  const handlerReset = () => {
-    ruc.resetvalue();
-    empresa.resetvalue();
-    fecha_inicio.resetvalue();
-    fecha_fin.resetvalue();
-    correo_empresa.resetvalue();
-    telefono_empresa.resetvalue();
-    direccion_empresa.resetvalue();
-    horas_uso.resetvalue();
-    precio_hora.resetvalue();
-    descripcion.resetvalue();
-    setMaquinaSeleccionada(null);
-  };
+  const inputStlye = "h-10 w-[100%] border-2 ps-[17px] mt-1 border-[#2F4A5B] transition-all duration-300 focus:border-blue-500 focus:outline-none";
+  const shortInput = "h-10 w-[80%] border-2 ps-[17px] mt-2 border-[#2F4A5B] transition-all duration-300 focus:border-blue-500 focus:outline-none";
 
   return (
-    <div className=" h-screen flex flex-col">
-      <BarraSuperior>Contrato de alquiler</BarraSuperior>
-      <div className="flex-1 w-[100%] ">
-        <h1 className="font-bold text-3xl ps-10 pt-7">
-          Información de contrato
-        </h1>
-        {/* Form */}
+    <div className="h-screen flex flex-col">
+      <BarraSuperior>Nuevo contrato de alquiler</BarraSuperior>
+      <div className="flex-1 w-[100%]">
         <form
           action=""
           className="p-2 flex flex-col gap-2 justify-center items-center w-full"
           onSubmit={handleSubmit}
         >
           <div className="flex gap-10 justify-center items-center">
-            {/* Column 1 */}
             <div className="flex flex-col gap-2 w-[30%]">
               <div className="flex flex-col ">
-                <label>
-                  Ruc de la empresa{" "}
-                  {ruc.required ? (
-                    <span className="text-red-700 font-bold text-xl">*</span>
-                  ) : (
-                    ""
-                  )}
-                </label>
+                <label>Ruc de la empresa {ruc.required ? <span className="text-red-700 font-bold text-xl">*</span> : ""}</label>
                 <input
                   {...ruc}
                   className={inputStlye}
@@ -169,14 +193,7 @@ function Registrar() {
                 />
               </div>
               <div className="flex flex-col ">
-                <label>
-                  Nombre de la empresa
-                  {empresa.required ? (
-                    <span className="text-red-700 font-bold text-xl">*</span>
-                  ) : (
-                    ""
-                  )}
-                </label>
+                <label>Nombre de la empresa{empresa.required ? <span className="text-red-700 font-bold text-xl">*</span> : ""}</label>
                 <input
                   {...empresa}
                   className={inputStlye}
@@ -213,19 +230,9 @@ function Registrar() {
                 </div>
               </div>
             </div>
-            {/* Column 1 */}
-
-            {/* Column 2 */}
             <div className="flex flex-col gap-6 w-[30%]">
               <div className="flex flex-col w-[100%]">
-                <label>
-                  Correo electronico de la empresa
-                  {correo_empresa.required ? (
-                    <span className="text-red-700 font-bold text-xl">*</span>
-                  ) : (
-                    ""
-                  )}
-                </label>
+                <label>Correo electronico de la empresa{correo_empresa.required ? <span className="text-red-700 font-bold text-xl">*</span> : ""}</label>
                 <input
                   {...correo_empresa}
                   className={inputStlye}
@@ -236,14 +243,7 @@ function Registrar() {
                 />
               </div>
               <div className="flex flex-col ">
-                <label>
-                  Teléfono de la empresa
-                  {telefono_empresa.required ? (
-                    <span className="text-red-700 font-bold text-xl">*</span>
-                  ) : (
-                    ""
-                  )}
-                </label>
+                <label>Teléfono de la empresa{telefono_empresa.required ? <span className="text-red-700 font-bold text-xl">*</span> : ""}</label>
                 <input
                   {...telefono_empresa}
                   className={inputStlye}
@@ -254,14 +254,7 @@ function Registrar() {
                 />
               </div>
               <div className="flex flex-col ">
-                <label>
-                  Dirección de la empresa
-                  {direccion_empresa.required ? (
-                    <span className="text-red-700 font-bold text-xl">*</span>
-                  ) : (
-                    ""
-                  )}
-                </label>
+                <label>Dirección de la empresa{direccion_empresa.required ? <span className="text-red-700 font-bold text-xl">*</span> : ""}</label>
                 <input
                   {...direccion_empresa}
                   className={inputStlye}
@@ -272,10 +265,7 @@ function Registrar() {
                 />
               </div>
             </div>
-            {/* Column 2 */}
-
-            {/* Column 3 */}
-            <div className="flex flex-col gap-6 w-[30%]" >
+            <div className="flex flex-col gap-6 w-[30%]">
               <div>
                 <label htmlFor="">Tipo de maquina</label>
                 <input
@@ -310,9 +300,8 @@ function Registrar() {
                 />
               </div>
             </div>
-            {/* Column 3 */}
           </div>
-          <div className="flex gap-1  items-center w-[90%]">
+          <div className="flex gap-1 items-center w-[90%]">
             <div className="flex flex-col w-[90%]">
               <label>Descripcion del contrato</label>
               <textarea
@@ -327,17 +316,17 @@ function Registrar() {
                 }}
               ></textarea>
             </div>
-            <div className="flex flex-col gap-2">
+            <div className="flex flex-col gap-2 justify-center items-center">
               <div className="flex gap-2">
                 <div className="flex flex-col">
-                  <label htmlFor="">Horas de uso</label>
+                  <label htmlFor="">Horas contratadas</label>
                   <input
                     type="text"
-                    className={shortInput}
-                    {...horas_uso}
+                    value={horasContratadas}
+                    className={inputStlye}
                     onChange={(e) => {
-                      horas_uso.onChange(e);
-                      handleInputChange(horas_uso.name, e.target.value);
+                      setHorasContratadas(e.target.value);
+                      calculateTotal(e.target.value, precioPorHora);
                     }}
                   />
                 </div>
@@ -345,34 +334,31 @@ function Registrar() {
                   <label htmlFor="">Precio por hora</label>
                   <input
                     type="text"
-                    className={shortInput}
-                    {...precio_hora}
+                    value={precioPorHora}
+                    className={inputStlye}
                     onChange={(e) => {
-                      precio_hora.onChange(e);
-                      handleInputChange(precio_hora.name, e.target.value);
+                      setPrecioPorHora(e.target.value);
+                      calculateTotal(horasContratadas, e.target.value);
                     }}
                   />
                 </div>
               </div>
-              <div className="flex gap-2 justify-end  ">
+              <div className="flex gap-2 justify-end">
                 <div className="flex items-center gap-5">
                   <label htmlFor="">Monto total</label>
-                  <input className={shortInput} />
+                  <input
+                    type="text"
+                    value={montoTotal}
+                    readOnly
+                    className={inputStlye}
+                  />
                 </div>
               </div>
             </div>
           </div>
           <div className="mt-5">
-            <button className="w-[200px] bg-[#234053] text-white rounded-xl py-3 px-1 mr-6">
-              Procesar
-            </button>
-            <button
-              onClick={handlerReset}
-              type="button"
-              className="w-[200px] bg-[#F0EFEF] text-black rounded-xl py-3 px-1"
-            >
-              descartar
-            </button>
+            <button className="w-[200px] bg-[#234053] text-white rounded-xl py-3 px-1 mr-6">Procesar</button>
+            <button onClick={resetForm} type="button" className="w-[200px] bg-[#F0EFEF] text-black rounded-xl py-3 px-1">Descartar</button>
           </div>
         </form>
       </div>

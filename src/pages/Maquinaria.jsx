@@ -17,6 +17,9 @@ function Maquinaria() {
   const [tipos, setTipos] = useState([]);
   const [operadores, setOperadores] = useState([]);
   const [maquinas, setMaquinas] = useState([]);
+  const [maquinasActivas, setMaquinasActivas] = useState([]);
+  const [mostrarActivas, setMostrarActivas] = useState(false);
+  const [orden, setOrden] = useState(""); 
 
   const handleChange = (e) => {
     const { name, value, files } = e.target;
@@ -33,9 +36,29 @@ function Maquinaria() {
     }
   };
 
+  const handleChangeOrden = (e) => {
+    setOrden(e.target.value); 
+  };
+  
+  const obtenerToken = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No se ha iniciado sesión',
+        text: 'Debes iniciar sesión para acceder a esta página',
+        confirmButtonColor: '#2F4A5B',
+      }).then(() => {
+        window.location.href = "/login";
+      });
+    }
+    return token;
+  };
+
   const handleAlquilar = (maquinaData) => {
+    console.log("Datos de la máquina seleccionada:", maquinaData)
     setMaquinaSeleccionada(maquinaData);
-    navigate("/inicio");
+    navigate("/inicio/registrar");
   };
 
   const handlerOpenModal = () => {
@@ -59,12 +82,15 @@ function Maquinaria() {
       cantidadAceite: parseFloat(formValues.cantidad_aceite),
       trabajadorID: parseInt(formValues.trabajadorID),
     };
-  
+
+    const token = obtenerToken();
+    
     try {
       const response = await fetch("http://localhost:8080/api/maquinas", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
+          "Authorization": `Bearer ${token}`,
         },
         body: JSON.stringify(registroMaquinaria),
       });
@@ -154,7 +180,13 @@ function Maquinaria() {
 
   const ObtenerMarcas = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/marca_maquinas");
+      const token = obtenerToken();
+      const response = await fetch("http://localhost:8080/api/marca_maquinas", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+  
       if (!response.ok) {
         throw new Error("Error al obtener los datos de las marcas");
       }
@@ -164,45 +196,71 @@ function Maquinaria() {
       setError("Error al obtener la marca");
     }
   };
+  
   const ObtenerTipos = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/tipomaquinaria");
+      const token = obtenerToken();
+  
+      const response = await fetch("http://localhost:8080/api/tipomaquinaria", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+  
       if (!response.ok) {
         throw new Error("Error al obtener los tipos de maquinaria");
       }
       const data = await response.json();
-
       setTipos(data);
     } catch (error) {
-      setError("Error al obtener la marca");
+      setError("Error al obtener los tipos de maquinaria");
     }
   };
+  
   const ObtenerOperadores = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/operadores");
+      const token = obtenerToken();
+  
+      const response = await fetch("http://localhost:8080/api/operadores", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+  
       if (!response.ok) {
         throw new Error("Error al obtener los operadores");
       }
+      
       const data = await response.json();
       setOperadores(data);
     } catch (error) {
       setError("Error al obtener operadores");
     }
   };
+  
 
   const ObtenerMaquinas = async () => {
     try {
-      const response = await fetch("http://localhost:8080/api/maquinas");
+      const token = obtenerToken();
+  
+      const response = await fetch("http://localhost:8080/api/maquinas", {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+  
       if (!response.ok) {
-        throw new Error("Error al obtener las maquinas");
+        throw new Error("Error al obtener las máquinas");
       }
+      
       const data = await response.json();
       console.log(data);
       setMaquinas(data);
     } catch (error) {
-      setError("Error al obtener maquinas");
+      setError("Error al obtener máquinas");
     }
   };
+  
 
   useEffect(() => {
     ObtenerOperadores();
@@ -210,10 +268,37 @@ function Maquinaria() {
     ObtenerTipos();
     ObtenerMaquinas();
   }, []);
+  
+
+  const filtrarActivas = () => {
+    const activas = maquinas.filter((maquina) => maquina.estado  === true);
+    setMaquinasActivas(activas);
+  };
+  
+
+  const toggleMostrarActivas = () => {
+    setMostrarActivas(!mostrarActivas);
+    if (!mostrarActivas) {
+      filtrarActivas();
+    } else {
+      ObtenerMaquinas();
+    }
+  };
+
+  const ordenarMaquinarias = (maquinarias) => {
+    if (orden === "tipoMaquinaria") {
+      return maquinarias.sort((a, b) => a.tipoMaquinaria.localeCompare(b.tipoMaquinaria));
+    } else if (orden === "marca") {
+      return maquinarias.sort((a, b) => a.marca.localeCompare(b.marca));
+    } else {
+      return maquinarias;
+    }
+  };
+
 
   return (
     <div className="h-screen flex flex-col">
-      <BarraSuperior>Catálago de Maquinaria</BarraSuperior>
+      <BarraSuperior>Catálogo de Maquinaria</BarraSuperior>
       <div className="flex-1 flex justify-center items-center relative">
         {openModal && (
           <div className="fixed top-0 left-0 w-full h-full bg-black opacity-50 z-40"></div>
@@ -342,53 +427,55 @@ function Maquinaria() {
             >
               Registrar Maquinaria
             </button>
-
+            <button
+              className="bg-[#2F4A5B] px-8 py-2 text-white rounded-xl"
+              onClick={toggleMostrarActivas}
+            >
+              {mostrarActivas ? "Mostrar todas" : "Mostrar activos"}
+            </button>
             <div className="flex  items-center font-medium text-xl">
-              <span className="">Ordenar por: </span>
-              <select id="" className="bg-inherit ">
-                <option value="nombre">Tipo</option>
-                <option value="marca">Marca</option>
-              </select>
+              <span className="text-[#2F4A5B]">Ordenar por: </span>
+              <select
+                id="filtro"
+                className="appearance-none bg-[#2F4A5B] border text-white border-gray-300 rounded-md py-2 px-10 focus:outline-none focus:border-blue-500"
+                value={orden} 
+                onChange={handleChangeOrden}
+              >
+            <option value="tipoMaquinaria">Tipo</option>
+            <option value="marca">Marca</option>
+          </select>
             </div>
           </div>
-          {/* interfaz de muestra */}
-          <div className="p-7  overflow-hidden">
-            <div className="overflow-y-scroll flex flex-col gap-7 flex-1" style={{ maxHeight: "60vh" }}>
-              {maquinas.map((maquina) => (
-                <div key={maquina.maquinaID} className="flex items-center justify-between rounded-lg shadow-md p-4">
-                  <div className="flex gap-3 items-center flex-1" style={{ width: "80%" }}>
-                    <img
-                      src={"https://www.finning.com/content/dam/finning/es/Images/Interiores/Secciones/Empresa/Noticias/Noticias_FINSA/420F2_560x394.jpg"}
-                      width={250}
-                      alt=""
-                      className="rounded-md"
-                    />
-                    <div className="font-medium text-xl" style={{ width: "100%" }}>
-                      <p className="text-gray-800">Tipo: {maquina.tipoMaquinaria}</p>
-                      <p className="text-gray-800">Marca: {maquina.marca}</p>
-                      <p className="text-gray-800">Modelo: {maquina.modelo}</p>
-                      <p className="text-gray-800">Operador: {maquina.trabajador + " " + maquina.apellidoTrabajador}</p>
-                    </div>
-                  </div>
-                  <hr className="border-2 rotate-90 w-44 self-center" />
-                  <div className="flex-1 flex items-center flex-col justify-center" style={{ width: "20%" }}>
-                    {maquina.estado ? (
-                      <p className="text-xl relative px-4 flex text-red-500 font-bold">
-                        <span className="absolute rounded-full w-3 h-3 bg-red-500 top-0 left-0 translate-y-[50%]"></span>
-                        <span className="ml-2">Alquilada o en mantenimiento</span>
-                      </p>
-                    ) : (
-                      <p className="text-xl relative px-4 flex text-green-500 font-bold">
-                        <span className="absolute rounded-full w-3 h-3 bg-green-500 top-0 left-0 translate-y-[50%]"></span>
-                        <span className="ml-2">Disponible</span>
-                      </p>
-                    )}
-                    {!maquina.estado && (
-                      <div className="font-medium text-xl text-white">
+          <div className="p-7 h-[75vh] overflow-y-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-7">
+            {ordenarMaquinarias(mostrarActivas ? maquinasActivas : maquinas).map((maquina) => (
+                <div
+                  key={maquina.maquinariaID}
+                  className={`rounded-lg shadow-md cursor-pointer overflow-hidden ${maquina.estado ? 'bg-green-100' : 'bg-red-100'}`}
+                  onClick={() => maquina.estado && handleAlquilar({
+                    maquinaID: maquina.maquinariaID,
+                    tipo_maquina: maquina.tipoMaquinaria,
+                    marca_maquina: maquina.marca,
+                    modelo_maquina: maquina.modelo,
+                  })}
+                >
+                  <img
+                    src={"https://www.finning.com/content/dam/finning/es/Images/Interiores/Secciones/Empresa/Noticias/Noticias_FINSA/420F2_560x394.jpg"}
+                    alt="Imagen de maquinaria"
+                    className="w-full h-44 object-cover"
+                  />
+                  <div className="p-4">
+                    <p className="text-gray-800 font-medium"><b>Tipo    </b>: {maquina.tipoMaquinaria}</p>
+                    <p className="text-gray-800 font-medium"><b>Marca   </b>: {maquina.marca}</p>
+                    <p className="text-gray-800 font-medium"><b>Modelo  </b>: {maquina.modelo}</p>
+                    <p className="text-gray-800 font-medium"><b>Operador</b>: {maquina.trabajador + " " + maquina.apellidoTrabajador}</p>
+                    {maquina.estado && (
+                      <div className="mt-2 flex justify-center">
                         <button
-                          className="py-2 px-8 bg-[#2F4A5B] mt-1 rounded-md text-white shadow-md hover:bg-opacity-80 transition duration-300"
+                          className="py-2 px-4 bg-blue-600 rounded-md text-white shadow-md hover:bg-blue-700 transition duration-300 w-full max-w-xs"
                           onClick={() =>
                             handleAlquilar({
+                              maquinaID: maquina.maquinaID,
                               tipo_maquina: maquina.tipoMaquinaria,
                               marca_maquina: maquina.marca,
                               modelo_maquina: maquina.modelo,
@@ -398,6 +485,9 @@ function Maquinaria() {
                           Alquilar
                         </button>
                       </div>
+                    )}
+                    {!maquina.estado && (
+                      <div className="text-red-500 font-medium mt-2 text-center">Alquilada o en mantenimiento</div> 
                     )}
                   </div>
                 </div>
@@ -411,3 +501,4 @@ function Maquinaria() {
 }
 
 export default Maquinaria;
+

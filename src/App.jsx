@@ -7,6 +7,7 @@ import Login from "./pages/Login";
 import Registrar from "./pages/Registrar";
 import Maquinaria from "./pages/Maquinaria.jsx";
 import Almacen from "./pages/Almacen.jsx";
+import Contratos from "./pages/Contratos.jsx";
 export const MaquinaContext = React.createContext();
 
 function App() {
@@ -20,9 +21,11 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/login" element={<Login />} />
           <Route element={<Dashboard />} path="/inicio/*">
-            <Route path="" element={<Registrar />} />
+          <Route path="" element={<Contratos />} />
+            <Route path="registrar" element={<Registrar />} />
             <Route path="maquinaria" element={<Maquinaria />} />
             <Route path="almacen" element={<Almacen />} />
+            
           </Route>
         </Routes>
       </BrowserRouter>
