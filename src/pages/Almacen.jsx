@@ -33,23 +33,22 @@ const Almacen = () => {
     obtenerTiposMantenimiento();
     obtenerMaquinas();
   }, []);
-const obtenerToken = () => {
-  const token = localStorage.getItem("token");
-  if (!token) {
-    Swal.fire({
-      icon: 'warning',
-      title: 'No se ha iniciado sesión',
-      text: 'Debes iniciar sesión para acceder a esta página',
-      confirmButtonColor: '#2F4A5B',
-      time: 2000,
-    }).then(() => {
-      window.location.href = "/login";
-    });
-  }
-  return token;
-};
+  const obtenerToken = () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      Swal.fire({
+        icon: 'warning',
+        title: 'No se ha iniciado sesión',
+        text: 'Debes iniciar sesión para acceder a esta página',
+        confirmButtonColor: '#2F4A5B',
+        time: 2000,
+      }).then(() => {
+        window.location.href = "/login";
+      });
+    }
+    return token;
+  };
   
-
   const obtenerMateriales = async () => {
     try {
       const token = obtenerToken();
@@ -212,7 +211,7 @@ const obtenerToken = () => {
 
         const response = await fetch(`http://localhost:8080/api/productos/buscar?nombre=${busqueda}`, {
           headers: {
-            "Authorization": `Bearer ${token}`, // Agregar el token JWT en la cabecera Authorization
+            "Authorization": `Bearer ${token}`, 
           },
         });
         if (!response.ok) {

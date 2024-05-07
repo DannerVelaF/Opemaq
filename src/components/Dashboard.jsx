@@ -1,87 +1,96 @@
 import React, { useEffect } from "react";
-import { Link, Outlet, useNavigate } from "react-router-dom"; // Importamos useNavigate
+import { Link, Outlet, useNavigate } from "react-router-dom";
+import Swal from "sweetalert2";
 import Logo from "../assets/Empresa-logo.webp";
-
-import Contract from "../assets/dashboard icons/Contrato";
-import Maquinaria from "../assets/dashboard icons/Maquinaria";
-import Almacen from "../assets/dashboard icons/Almacen";
-import LogOut from "../assets/dashboard icons/LogOut";
+import { FaWarehouse, FaFileInvoice, FaTools, FaStore, FaSignOutAlt } from 'react-icons/fa'; // Importa los iconos de react-icons
 
 function Dashboard() {
   useEffect(() => {
     document.title = "Opemaq Construye EIRL";
   }, []);
 
-  const navigate = useNavigate(); // Usamos useNavigate para la navegación
+  const navigate = useNavigate();
 
   const handleCerrarSesion = () => {
-    localStorage.removeItem("token");
-    navigate("/login"); // Redireccionamos al usuario al componente de inicio de sesión
+    Swal.fire({
+      title: "¿Estás seguro?",
+      text: "¿Deseas cerrar sesión?",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Sí",
+      cancelButtonText: "No",
+    }).then((result) => {
+      if (result.isConfirmed) {
+        localStorage.removeItem("token");
+        navigate("/login");
+      }
+    });
   };
 
   const opciones = [
     {
-      icon: <Contract width={46} color={"#ffff"} />,
-      text: "Gestionar contratos",
+      icon: <FaWarehouse  style={{ color: 'white', fontSize: '1.6rem'  }} />,
+      text: "Dashboard",
       to: "",
     },
     {
-      icon: <Maquinaria width={46} color={"#ffff"} />,
-      text: "Gestionar maquinaria",
+      icon: <FaFileInvoice style={{ color: 'white', fontSize: '1.6rem' }} />,
+      text: "Contratos",
+      to: "contratos",
+    },
+    {
+      icon: <FaTools style={{ color: 'white', fontSize: '1.6rem' }} />,
+      text: "Maquinaria",
       to: "maquinaria",
     },
     {
-      icon: <Almacen width={46} color={"#ffff"} />,
-      text: "Gestionar materiales",
+      icon: <FaStore style={{ color: 'white', fontSize: '1.6rem' }} />,
+      text: "Almacén",
       to: "almacen",
     },
     {
-      icon: <LogOut width={46} color={"#ffff"} />,
-      text: "Cerrar Sesion",
+      icon: <FaSignOutAlt style={{ color: 'black', fontSize: '1.4rem', margin: '0 0 0 .5rem' }} />,
       onClick: handleCerrarSesion,
+      text: "Cerrar Sesión",
       to: "login",
     },
   ];
 
   return (
-    <div className="h-screen flex w-full ">
+    <div className="flex">
       {/* Dashboard */}
-      <div className="bg-[#fafafa] w-[290px] border-e shadow-2xl max-h-screen flex flex-col">
-        <div className="bg-[#2F4A5B] h-[132px] flex justify-center items-center">
-          <img src={Logo} width={90} alt="Logo" />
-          <p className="text-white uppercase text- text-xl">
-            opemaq <br /> construye
-          </p>
+      <div className="bg-[#2F4A5B] w-[15%] border-r shadow-2xl flex flex-col items-center">
+        <div className="bg-[#2F4A5B] w-[100%] flex h-[15%] justify-center items-center border-b-2">
+          <img src={Logo} width={100} alt="Logo" />
+          <p className="text-white uppercase text-1xl">Opemaq <br /> Construye</p>
         </div>
-        <div className="h-screen flex flex-1 flex-col justify-center items-center gap-10">
+        <div className="flex-1 flex flex-col justify-center items-center gap-5">
           {opciones.map((op, key) => (
-            <div
-              className="flex items-center flex-col justify-center w-[100%]"
-              key={key}
-            >
-              {/* Si hay una función onClick, usar un botón en lugar de un Link */}
+            <div className="flex items-center flex-col" key={key}>
               {op.onClick ? (
                 <button
                   onClick={op.onClick}
-                  className=" bg-[#234053] hover:bg-[#277193] active:bg-[#255d79] w-[66px] h-[66px] flex justify-center items-center rounded-[15px]"
+                  className={op.text === "Cerrar Sesión" ? "bg-red-600 hover:bg-red-700 active:bg-red-800 w-[45px] h-[45px] rounded-[15px]" : "bg-[#234053] hover:bg-[#277193] active:bg-[#255d79] w-[50px] h-[50px] rounded-[15px]"}
                 >
                   {op.icon}
                 </button>
               ) : (
                 <Link
                   to={op.to}
-                  className=" bg-[#234053] hover:bg-[#277193] active:bg-[#255d79] w-[66px] h-[66px] flex justify-center items-center rounded-[15px]"
+                  className="bg-[#234053] hover:bg-[#277193] active:bg-[#255d79] w-[50px] h-[50px] flex justify-center items-center rounded-[15px]"
                 >
                   {op.icon}
                 </Link>
               )}
-              <p className="text-[#2F4A5B] font-bold">{op.text}</p>
+              <p className="text-[#fff] font-bold">{op.text}</p>
             </div>
           ))}
         </div>
       </div>
       {/* show section */}
-      <div className="h-screen w-full">
+      <div className="flex-1">
         <Outlet />
       </div>
     </div>

@@ -7,6 +7,9 @@ import { useHref } from "react-router-dom";
 
 const useField = ({ placeholder, name, autoComplete = "off", required }) => {
   const [value, setValue] = useState("");
+  const [horasContratadas, setHorasContratadas] = useState('');
+  const [precioPorHora, setPrecioPorHora] = useState('');
+  const [montoTotal, setMontoTotal] = useState('');
 
   const onChange = (event) => {
     setValue(event.target.value);
@@ -98,7 +101,7 @@ function Registrar() {
         title: "Se realizo el contrato exitosamente",
         confirmButtonColor: "#2F4A5B",
       }).then(() => {
-        navigate("/inicio"); 
+        navigate("/inicio/contratos"); 
       });
   
       resetForm();
@@ -113,6 +116,11 @@ function Registrar() {
     setHorasContratadas("");
     setPrecioPorHora("");
     setMontoTotal("");
+  };
+
+  const calculateTotal = (horas, precio) => {
+    const total = parseFloat(horas) * parseFloat(precio);
+    setMontoTotal(isNaN(total) ? '' : total.toFixed(2));
   };
 
   const handleInputChange = (field, value) => {

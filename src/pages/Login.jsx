@@ -52,14 +52,14 @@ const FormSide = () => {
   };
 
   return (
-    <div className="w-[90vh] flex justify-center items-center bg-[#ffffff] h-screen rounded-[40px]">
+    <div className="w-[47%] flex justify-center items-center bg-[#ffffff] h-screen rounded-r-[20%]">
       <div className="flex flex-col items-center text-[#283B4A]">
       <img 
         src={Logo} 
         alt="" 
         width={150} 
         className="rounded-full"
-        style={{ boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.2)' }}
+        style={{ boxShadow: '0px 0px 10px rgba(0, 0, 0, 0.9)' }}
       />
 
         <h1 className="mt-[2%] text-[20px] font-bold">OPEMAQ CONSTRUYE</h1>
@@ -124,7 +124,7 @@ const FormSide = () => {
 
 const ImageSide = () => {
   return (
-    <div className="brightness-50">
+    <div className="brightness-50 w-[53%]">
     </div>
   );
 };
