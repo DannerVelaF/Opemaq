@@ -208,11 +208,11 @@ useEffect(() => {
       <BarraSuperior>Dashboard</BarraSuperior>
       <div className="flex-1 flex justify-center w-full p-1 h-[70%]">
         {/* Primer gráfico */}
-        <div style={{ width: '60%', minWidth: '400px', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <div className="flex justify-center items-center" style={{ width: '60%', minWidth: '400px', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <canvas ref={chartRef} />
         </div>
         {/* Segundo gráfico de Distribución de Productos */}
-        <div style={{ width: '30%', minWidth: '200px', height: '100%' }}>
+        <div className="flex justify-center items-center" style={{ width: '30%', minWidth: '200px', height: '100%' }}>
           <canvas ref={doughnutRef} />
         </div>
       </div>

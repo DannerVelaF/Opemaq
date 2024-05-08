@@ -4,7 +4,6 @@ import Swal from "sweetalert2";
 import { FaSearch, FaFileInvoice } from 'react-icons/fa';
 import Modal from '../components/Modal'; 
 import Logo from "./../assets/Empresa-logo.webp";
-import { PDFDownloadLink } from '@react-pdf/renderer';
 import html2pdf from 'html2pdf.js';
 
 const Contratos = () => {
@@ -170,9 +169,9 @@ const Contratos = () => {
                     <td className="border border-gray-300 px-4 py-2">{new Date(contrato.fechaFin).toLocaleDateString()}</td>
                     <td className="border border-gray-300 px-4 py-2">{contrato.precioHora}</td>
                     <td className="border border-gray-300 px-4 py-2">{contrato.horasContratadas}</td>
-                    <td className="border border-gray-300 px-4 py-2">
+                    <td className="border border-gray-300 px-4 py-2 flex items-center justify-center">
                       <button
-                        className="px-4 py-2 bg-[#2F4A5B] text-white rounded-md flex items-center h-10"
+                        className="px-2 py-2 bg-[#2F4A5B] text-white rounded-md flex items-center justify-center"
                         onClick={() => handlerOpenModalFactura(contrato)}
                       >
                         <FaFileInvoice className="mr-2" />
