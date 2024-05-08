@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import Fondo from "../assets/fondo.webp";
 import Imagen  from "../assets/fondo.svg";
-import Logo from "../assets/Opemaq Logo.jpg";
+import Logo from "../assets/OpemaqLogo.jpg";
 import { useNavigate } from "react-router-dom";
 import { FaUser, FaLock, FaEye, FaEyeSlash } from "react-icons/fa"; 
 import axios from "axios";

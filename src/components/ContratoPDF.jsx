@@ -92,7 +92,6 @@ const ContratoPDF = ({ contrato }) => {
     <Document>
       <Page size="A4" style={styles.page}>
         <View style={styles.header}>
-          <Image src={logo} style={styles.logo} />
           <Text style={styles.title}>Factura de Servicios</Text>
         </View>
         <View style={styles.section}>

@@ -22,7 +22,8 @@ const Almacen = () => {
   const [tipoMantenimiento, setTipoMantenimiento] = useState([]);
   const [tipoMantenimientoSeleccionado, setTipoMantenimientoSeleccionado] = useState(""); 
   const [mantenimientoSeleccionado, setMantenimientoSeleccionado] = useState(null);
-  const [maquinariaSeleccionada, setMaquinariaSeleccionada] = useState(null);
+  const [maquinariaSeleccionada, setMaquinariaSeleccionada] = useState("");
+  const [maquinariaSeleccionadaEntrega, setMaquinariaSeleccionadaEntrega] = useState("");
   const [mantenimientos, setMantenimientos] = useState([]);
   const [horometro, setHorometro] = useState("");
 
@@ -239,6 +240,13 @@ const Almacen = () => {
     try {
         const token = obtenerToken();
 
+
+        if (!maquinariaSeleccionadaEntre) {
+          console.error("Seleccione una máquina");
+          return;
+        }
+
+        
         if (nombreProducto.trim() === "" || cantidad.trim() === "" || isNaN(parseInt(cantidad)) || parseInt(cantidad) <= 0 || isNaN(parseInt(categoriaSeleccionada)) || parseInt(categoriaSeleccionada) <= 0) {
             throw new Error("Por favor complete todos los campos correctamente.");
         }
@@ -338,7 +346,7 @@ const Almacen = () => {
   const handleEntregarMaterial = async (event) => {
     event.preventDefault();
     try {
-      if (!maquinariaSeleccionada) {
+      if (!maquinariaSeleccionadaEntrega) {
         throw new Error("Por favor selecciona una máquina.");
       }
       if (!productoSeleccionado || !tipoMantenimientoSeleccionado || !cantidad || isNaN(Number(cantidad))) {
@@ -355,14 +363,14 @@ const Almacen = () => {
         throw new Error("No hay suficiente stock del producto.");
       }
       const registroEntrega = {
-        maquinariaID: parseInt(maquinariaSeleccionada),
+        maquinariaID: maquinariaSeleccionadaEntrega,
         horometro_mantenimiento: horometro,
         fecha_mantenimiento: new Date(),
         productoID: parseInt(productoSeleccionado.productoID),
         tipo_mantenimiento: tipoMantenimiento,
-        cantidad: parseInt(cantidad),
+        cantidad: parseFloat(cantidad),
       };
-  
+
       const token = obtenerToken();
   
       const response = await fetch("http://localhost:8080/api/mantenimientos", {
@@ -540,8 +548,8 @@ const Almacen = () => {
                   <label htmlFor="maquinaria">Máquina:</label>
                   <select
                     id="maquinaria"
-                    value={maquinariaSeleccionada}
-                    onChange={(e) => setMaquinariaSeleccionada(e.target.value)}
+                    value={maquinariaSeleccionadaEntrega}
+                    onChange={(e) => setMaquinariaSeleccionadaEntrega(e.target.value)} // Aquí deberías almacenar solo el ID
                     className="px-4 py-2 border border-gray-300 rounded-md"
                     required
                   >
@@ -567,7 +575,6 @@ const Almacen = () => {
                           </option>
                       ))}
                   </select>
-
                   <label htmlFor="horometro">Horómetro:</label>
                   <input
                     type="number"
@@ -682,7 +689,7 @@ const Almacen = () => {
             </button>
           </div>
           {error && <div className="text-red-500 mb-4">{error}</div>}
-          <div style={{ maxHeight: "60vh", overflowY: "auto" }}>
+          <div style={{ maxHeight: "71vh", overflowY: "auto" }}>
             <table className="w-[100%] border-collapse border border-gray-300 mb-4">
               <thead>
                 <tr>

@@ -7,17 +7,12 @@ import { useHref } from "react-router-dom";
 
 const useField = ({ placeholder, name, autoComplete = "off", required }) => {
   const [value, setValue] = useState("");
-  const [horasContratadas, setHorasContratadas] = useState('');
-  const [precioPorHora, setPrecioPorHora] = useState('');
-  const [montoTotal, setMontoTotal] = useState('');
 
   const onChange = (event) => {
     setValue(event.target.value);
   };
 
-  const resetValue = () => {
-    setValue("");
-  };
+
 
   return {
     placeholder,
@@ -26,7 +21,6 @@ const useField = ({ placeholder, name, autoComplete = "off", required }) => {
     onChange,
     autoComplete,
     required,
-    resetValue,
   };
 };
 
